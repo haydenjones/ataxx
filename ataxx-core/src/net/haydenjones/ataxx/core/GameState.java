@@ -9,6 +9,8 @@ package net.haydenjones.ataxx.core;
  * @author hjones
  */
 public class GameState {
+    public static final byte EMPTY_SQUARE = 0;
+    
     private final byte currentPlayerID;
     private final byte[][] board;
     
