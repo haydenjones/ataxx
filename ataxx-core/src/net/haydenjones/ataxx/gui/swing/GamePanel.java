@@ -26,7 +26,7 @@ import net.haydenjones.ataxx.core.GameState;
 
 /**
  *
- * @author hjones
+ * @author hjones^
  */
 public class GamePanel extends JPanel {
     public static void main(String[] args) {

@@ -50,10 +50,10 @@ public class GameAI {
     
     public enum Jump {
         NNWW(-2, -2), NNW(-2, 1), NN(-2, 0), NNE(-2, 1), NNEE(-2, 2),
-        NWW(-1, -2), NEE(-1, 2),
-        WW(0, -2), EE(0, 2),
-        SWW(1, -2), SEE(1, 2),
-        SSWW(2, -2), SSW(2, 1), SS(2, 0), SSE(2, 1), SSEE(2, 2);
+         NWW(-1, -2),                                     NEE(-1, 2),
+          WW(0, -2),                                       EE(0, 2),
+         SWW(1, -2),                                      SEE(1, 2),
+        SSWW(2, -2),  SSW(2, -1), SS(2, 0),  SSE(2, 1),  SSEE(2, 2);
         
         private final int rowAdj;
         private final int colAdj;
