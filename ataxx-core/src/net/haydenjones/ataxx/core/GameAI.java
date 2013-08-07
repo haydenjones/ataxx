@@ -5,7 +5,6 @@
 package net.haydenjones.ataxx.core;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -14,14 +13,20 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author hjones
  */
 public class GameAI {
+
+    public GameMove determineMove(GameState state, byte[] playerOrdering) {
+        FindBestMove fbm = new FindBestMove(state, playerOrdering, this);
+        return fbm.exec();
+    }
+    
     public enum MoveType {
         NULL, GROW, JUMP;
     }
     
     public enum Grow {
         NW(-1, -1), N(-1, 0), NE(-1, 1),
-        W(-1, 0), E(1, 0),
-        SW(1, -1), S(1, 0), SE(1, 1);
+         W(0, -1),             E(0, 1),
+        SW(1, -1),  S(1, 0),  SE(1, 1);
         
         private final int rowAdj;
         private final int colAdj;
@@ -74,7 +79,7 @@ public class GameAI {
         super();
     }
     
-    public Collection<GameMove> getPossibleMoves(GameState state)  {
+    public List<GameMove> getPossibleMoves(GameState state)  {
         List<GameMove> moves = new ArrayList<GameMove>();
         
         for (int i1=0; i1<state.getBoard().length; i1++)  {
