@@ -8,10 +8,10 @@ package net.haydenjones.ataxx.core;
  *
  * @author hjones
  */
-public class GamePos {
+public class GamePos implements Comparable<GamePos> {
     public static final GamePos NULL = new GamePos(-1, -1);
 
-    static GamePos ofRowCol(int row, int col) {
+    public static GamePos ofRowCol(int row, int col) {
         return new GamePos(row, col);
     }
     
@@ -30,5 +30,38 @@ public class GamePos {
     
     public int getCol()  {
         return col;
+    }
+
+    @Override
+    public String toString()  {
+        if (this == GamePos.NULL)  {
+            return "GamePos (NULL)";
+        }
+        return String.format("GamePos (row: %s, col:%s)", row,col);
+    }
+    
+    @Override
+    public int hashCode()  {
+        return (19 * row) + (17 * col) + 13;
+    }
+    
+    @Override
+    public int compareTo(GamePos gp)  {
+        int c = gp.row - row;
+        if (c != 0)  {
+            return c;
+        }
+        
+        return gp.col - col;
+    }
+    
+    @Override
+    public boolean equals(Object o)  {
+        if (!(o instanceof GamePos))  {
+            return false;
+        }
+
+        GamePos gp = (GamePos) o;
+        return (compareTo(gp) == 0);
     }
 }
