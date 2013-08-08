@@ -15,7 +15,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import net.haydenjones.ataxx.core.GameAI;
 import net.haydenjones.ataxx.core.GameInfo;
@@ -29,28 +28,6 @@ import net.haydenjones.ataxx.core.GameState;
  * @author hjones^
  */
 public class GamePanel extends JPanel {
-    public static void main(String[] args) {
-        System.out.println("Begin");
-        
-        byte[][] board = new byte[][] {
-            new byte[] { 1, 0, 0, 0, 0, 0, 2 },
-            new byte[] { 0, 0, 0, 0, 0, 0, 0 },
-            new byte[] { 0, 0, 0, 0, 0, 0, 0 },
-            new byte[] { 0, 0, 0, 0, 0, 0, 0 },
-            new byte[] { 0, 0, 0, 0, 0, 0, 0 },
-            new byte[] { 0, 0, 0, 0, 0, 0, 0 },
-            new byte[] { 2, 0, 0, 0, 0, 0, 1 },
-        };
-                
-        GameState gs = new GameState(board, (byte) 1);
-        GameInfo gi = new GameInfo(gs, new byte[] { 1, 2 });
-        
-        GamePanel panel = new GamePanel(gi);
-        JOptionPane.showConfirmDialog(null, panel);
-        
-        System.out.println("End");
-    }
-    
     final static int squareSize = 20;
     
     private final GameInfo gameInfo;
@@ -64,7 +41,8 @@ public class GamePanel extends JPanel {
     private final AtomicReference<GamePos> hoverPos = new AtomicReference<GamePos>();
     private final AtomicBoolean myTurn = new AtomicBoolean(false);
     private final Timer timer = new Timer(true);
-
+    private final BoardJPanel board;
+    
     byte[] getPlayerOrdering()  {
         return gameInfo.getPlayerOrdering();
     }
@@ -73,8 +51,9 @@ public class GamePanel extends JPanel {
         return myTurn.get();
     }
     
-    public GamePanel(GameInfo info)  {
+    public GamePanel(GameInfo info, BoardJPanel board)  {
         super();
+        this.board = board;
         gameInfo = info;
         stateRef.set(info.getState());
         size = new Dimension(squareSize * info.getState().getBoard()[0].length, squareSize * info.getState().getBoard().length);
@@ -167,6 +146,7 @@ public class GamePanel extends JPanel {
                     stateRef.set(info.getState());
                     fromPos.set(GamePos.NULL);
                     myTurn.set(false);
+                    updateScores();
                 }
             }
             else if (gamePos.equals(from))  {
@@ -215,9 +195,27 @@ public class GamePanel extends JPanel {
         stateRef.set(info.getState());
         fromPos.set(GamePos.NULL);
         myTurn.set(false);
-        repaint();
+        updateScores();
+    }
+    
+    public void updateScores()  {
+        GameState state = stateRef.get();
+        int red = 0;
+        int blue = 0;
+        for (int i1=0; i1<state.getBoard().length; i1++)  {
+            for (int i2=0; i2<state.getBoard()[i1].length; i2++)  {
+                if ((byte) 1 == state.getBoard()[i1][i2])  {
+                    red++;
+                }
+                else if ((byte) 2 == state.getBoard()[i1][i2])  {
+                    blue++;
+                }
+            }
+        }
+        board.updateScores(red, blue);
     }
 }
+
 class MyMouseListener implements MouseListener, MouseMotionListener {
     private final GamePanel panel;
     

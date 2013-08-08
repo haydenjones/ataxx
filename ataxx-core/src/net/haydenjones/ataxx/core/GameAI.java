@@ -15,7 +15,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class GameAI {
 
     public GameMove determineMove(GameState state, byte[] playerOrdering) {
-        FindBestMove fbm = new FindBestMove(state, playerOrdering, this);
+        FindBestMoveNode fbm = new FindBestMoveNode(state, playerOrdering, this, 2);
+        // FindBestMove fbm = new FindBestMove(state, playerOrdering, this);
         return fbm.exec();
     }
     
@@ -49,7 +50,7 @@ public class GameAI {
     }
     
     public enum Jump {
-        NNWW(-2, -2), NNW(-2, 1), NN(-2, 0), NNE(-2, 1), NNEE(-2, 2),
+        NNWW(-2, -2), NNW(-2, -1), NN(-2, 0), NNE(-2, 1), NNEE(-2, 2),
          NWW(-1, -2),                                     NEE(-1, 2),
           WW(0, -2),                                       EE(0, 2),
          SWW(1, -2),                                      SEE(1, 2),

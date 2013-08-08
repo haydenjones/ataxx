@@ -35,12 +35,12 @@ public class FindBestMove {
     public GameMove exec()  {
         List<GameMove> moves = ai.getPossibleMoves(initial);
         
-        byte myPlayerID = initial.getCurrentPlayerID();
+        final byte myPlayerID = initial.getCurrentPlayerID();
         
         List<GameMove> bestMoves = new ArrayList<GameMove>();
+        int bestScore = -99;
         
         // Let's just select the best move from my choices...
-        int bestScore = -99;
         for (GameMove move : moves)  {
             GameInfo gi = ai.move(initial, playerOrdering, move);
             int newScore = score(gi.getState().getBoard(), myPlayerID);
