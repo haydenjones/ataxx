@@ -21,13 +21,13 @@ public class BoardJPanel extends JPanel {
         System.out.println("Begin");
         
         byte[][] board = new byte[][] {
-            new byte[] { 1, 0, 0, 0, 0, 0, 2 },
-            new byte[] { 0, 0, 0, 0, 0, 0, 0 },
-            new byte[] { 0, 0, 0, 0, 0, 0, 0 },
-            new byte[] { 0, 0, 0, 0, 0, 0, 0 },
-            new byte[] { 0, 0, 0, 0, 0, 0, 0 },
-            new byte[] { 0, 0, 0, 0, 0, 0, 0 },
-            new byte[] { 2, 0, 0, 0, 0, 0, 1 },
+            new byte[] { 1,  0,  0, 0,  0,  0, 2 },
+            new byte[] { 0,  0, -1, 0, -1,  0, 0 },
+            new byte[] { 0, -1,  0, 0,  0, -1, 0 },
+            new byte[] { 0,  0,  0, 0,  0,  0, 0 },
+            new byte[] { 0, -1,  0, 0,  0, -1, 0 },
+            new byte[] { 0,  0, -1, 0, -1,  0, 0 },
+            new byte[] { 2,  0,  0, 0,  0,  0, 1 },
         };
                 
         GameState gs = new GameState(board, (byte) 1);
@@ -40,8 +40,8 @@ public class BoardJPanel extends JPanel {
     }
     
     
-    private final JLabel red = new JLabel("2");
-    private final JLabel blue = new JLabel("2");
+    private final JLabel red = new JLabel(" 2 ");
+    private final JLabel blue = new JLabel(" 2 ");
     private final GamePanel gamePanel;
     
     private BoardJPanel(GameInfo gi) {
@@ -58,8 +58,8 @@ public class BoardJPanel extends JPanel {
     }
     
     public void updateScores(int redScore, int blueScore)  {
-        red.setText("" + redScore);
-        blue.setText("" + blueScore);
+        red.setText(" " + redScore + " ");
+        blue.setText(" " + blueScore + " ");
         repaint();
     }
 }

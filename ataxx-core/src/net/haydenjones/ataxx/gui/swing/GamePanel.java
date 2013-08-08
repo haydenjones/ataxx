@@ -88,12 +88,18 @@ public class GamePanel extends JPanel {
         
         for (int row=0; row<gs.getBoard().length; row++)  {
             for (int col=0; col<gs.getBoard()[row].length; col++)  {
-                g2d.setColor(Color.BLACK);
-                g2d.drawRect(col * squareSize, row * squareSize, squareSize, squareSize);
-                
                 byte b = gs.getBoard()[row][col];
+                if (b == -1)  {
+                    g2d.setColor(Color.BLACK);
+                }
+                else {
+                    g2d.setColor(Color.GRAY);
+                }
+                
+                g2d.fillRect(col * squareSize, row * squareSize, squareSize, squareSize);
+                
 
-                g2d.setColor(Color.GRAY);
+                g2d.setColor(Color.BLACK);
                 g2d.drawRect(col * squareSize, row * squareSize, squareSize - 1, squareSize - 1);
 
                 if (b > GameState.EMPTY_SQUARE)  {
