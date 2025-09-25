@@ -24,4 +24,8 @@ public enum Tile {
     public final char charValue() {
         return this.charValue;
     }
+
+    public boolean isPiece() {
+        return (this != Tile.WALL) && (this != Tile.EMPTY);
+    }
 }

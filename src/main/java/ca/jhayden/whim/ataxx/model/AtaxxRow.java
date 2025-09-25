@@ -1,6 +1,7 @@
 package ca.jhayden.whim.ataxx.model;
 
 import java.util.Objects;
+import java.util.Map;
 
 public class AtaxxRow {
     public static AtaxxRow of(String row)  {
@@ -27,5 +28,32 @@ public class AtaxxRow {
             sb.append(t.charValue());
         }
         return sb.toString();
+    }
+
+    public Tile at(int col) {
+        if (col < 0)  {
+            return Tile.WALL;
+        }
+        else if (col >= tiles.length)  {
+            return Tile.WALL;
+        }
+        return tiles[col];
+    }
+
+    public AtaxxRow with(Map<Pos, Tile> changedTiles, int onlyThisRow) {
+        Tile[] tiles = new Tile[this.tiles.length];
+        boolean changed = false;
+
+        for (Map.Entry<Pos, Tile> entry : changedTiles.entrySet())  {
+            if (entry.getKey().row() == onlyThisRow)  {
+                tiles[entry.getKey().col()] = entry.getValue();
+                changed = true;
+            }
+        }
+
+        if (changed)  {
+            return new AtaxxRow(tiles);
+        }
+        return this;
     }
 }

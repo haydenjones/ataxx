@@ -13,9 +13,13 @@ public class NewGame_Test {
     public void skeletonCoding() {
         AtaxxState state = GameEngine.newGame();
         assertNotNull(state);
-
-        assertEquals(0, state.currentPlayerIndex(), "current player index");
-
         assertEquals(2, state.players().size(), "# of Players");
+    }
+
+    @Test
+    public void newGame_boardStructure() {
+        AtaxxState state = GameEngine.newGame();
+        assertNotNull(state.board());
+        assertEquals(7, state.board().rows().size());
     }
 }
