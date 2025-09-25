@@ -2,8 +2,11 @@ package ca.jhayden.whim.ataxx.engine;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.SortedSet;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import ca.jhayden.whim.ataxx.model.AtaxxBoard;
 import ca.jhayden.whim.ataxx.model.AtaxxRow;
@@ -43,6 +46,37 @@ public class GameEngine {
 		Pos end = move.start().translate(move.move());
 		Tile endTile = state.board().at(end);
 		return (endTile == Tile.EMPTY);
+	}
+
+	public static SortedSet<GameMove> computeAllMoves(AtaxxState state) {
+		final var allMoves = new HashMap<String, GameMove>();
+
+		final Tile currentPlayer = state.currentPlayer().tile();
+		for (int startRow = 0; startRow < state.board().rows().size(); startRow++) {
+			final var row = state.board().rows().get(startRow);
+			for (int startCol = 0; startCol < row.length(); startCol++) {
+				final Pos startPos = new Pos(startRow, startCol);
+				Tile tile = state.board().at(startPos);
+				if (tile != currentPlayer) {
+					continue;
+				}
+
+				for (MoveType mt : MoveType.values()) {
+					GameMove move = new GameMove(startPos, mt);
+					boolean valid = isValidMove(state, move);
+					if (valid) {
+						Pos endPos = startPos.translate(move.move());
+						final String moveCode = String.format("%s-%s", move.move().isJump() ? startPos : "GROW",
+								endPos);
+						allMoves.putIfAbsent(moveCode, move);
+					}
+				}
+			}
+		}
+
+		final var out = new TreeSet<GameMove>();
+		out.addAll(allMoves.values());
+		return out;
 	}
 
 	public static AtaxxState applyMove(AtaxxState state, GameMove move) {
