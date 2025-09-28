@@ -1,9 +1,15 @@
 package ca.jhayden.whim.ataxx.model;
 
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 
-public final class AtaxxRow {
+public final class AtaxxRow implements Iterable<Tile> {
+	public static final List<AtaxxRow> EMPTY_LIST = Collections.emptyList();
+
 	public static AtaxxRow of(String row) {
 		Objects.requireNonNull(row, "AtaxxRow.of(row)");
 		row = row.trim();
@@ -15,10 +21,16 @@ public final class AtaxxRow {
 	}
 
 	private final Tile[] tiles;
+	private final Scores score;
 
 	private AtaxxRow(Tile[] rowTiles) {
 		super();
 		tiles = Objects.requireNonNull(rowTiles, "AtaxxRow(rowTiles)");
+		score = Scores.of(rowTiles);
+	}
+
+	public Scores getScore() {
+		return score;
 	}
 
 	public int length() {
@@ -65,4 +77,33 @@ public final class AtaxxRow {
 		}
 		return this;
 	}
+
+	@Override
+	public Iterator<Tile> iterator() {
+		return new MyIterator(tiles);
+	}
+}
+
+class MyIterator implements Iterator<Tile> {
+	private final Tile[] tiles;
+	private int index = 0;
+
+	MyIterator(Tile[] tiles) {
+		super();
+		this.tiles = tiles;
+	}
+
+	@Override
+	public boolean hasNext() {
+		return index < tiles.length;
+	}
+
+	@Override
+	public Tile next() {
+		if (index >= tiles.length) {
+			throw new NoSuchElementException(index + " >= " + tiles.length);
+		}
+		return tiles[index++];
+	}
+
 }

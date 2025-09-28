@@ -15,12 +15,16 @@ import ca.jhayden.whim.ataxx.model.GameMove;
 import ca.jhayden.whim.ataxx.model.MoveType;
 import ca.jhayden.whim.ataxx.model.Player;
 import ca.jhayden.whim.ataxx.model.Pos;
+import ca.jhayden.whim.ataxx.model.Scores;
 import ca.jhayden.whim.ataxx.model.Tile;
 
 public class GameEngine {
 	public static AtaxxState newGame() {
-		List<Player> players = Collections
-				.unmodifiableList(List.of(new Player(Tile.PIECE_1, true), new Player(Tile.PIECE_2, false)));
+		List<Player> players = Collections.unmodifiableList(List.of(new Player(Tile.PIECE_1, true), //
+				new Player(Tile.PIECE_2, false), //
+				new Player(Tile.PIECE_3, false), //
+				new Player(Tile.PIECE_4, false) //
+		));
 		AtaxxBoard board = AtaxxBoard.of("""
 				1.....2
 				.......
@@ -28,15 +32,61 @@ public class GameEngine {
 				...#...
 				.......
 				.......
-				2.....1""");
+				3.....4""");
 		return new AtaxxState(players, board);
+	}
+
+	public static boolean isGameOver(AtaxxState state) {
+		final Scores s = state.computeScores();
+
+		int activePlayers = 0;
+		if (s.piece1() > 0) {
+			activePlayers++;
+		}
+		if (s.piece2() > 0) {
+			activePlayers++;
+		}
+		if (s.piece3() > 0) {
+			activePlayers++;
+		}
+		if (s.piece4() > 0) {
+			activePlayers++;
+		}
+
+		if (activePlayers == 1) {
+			return true;
+		}
+
+		int rowPos = 0;
+		for (AtaxxRow row : state.board().rows()) {
+			int colPos = 0;
+			for (Tile tile : row) {
+				if (tile.isPiece()) {
+					Pos startPos = new Pos(rowPos, colPos);
+
+					for (MoveType mt : MoveType.values()) {
+						Pos endPos = startPos.translate(mt);
+
+						Tile endTile = state.board().at(endPos);
+						if (endTile == Tile.EMPTY) {
+							return false;
+						}
+					}
+				}
+
+				colPos++;
+			}
+
+			rowPos++;
+		}
+
+		return true;
 	}
 
 	public static boolean isValidMove(AtaxxState state, GameMove move) {
 		if (move == GameMove.PASS) {
 			return true;
 		}
-		;
 
 		Tile tile = state.board().at(move.start());
 		if (tile != state.currentPlayer().tile()) {

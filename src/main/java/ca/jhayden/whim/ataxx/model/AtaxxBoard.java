@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.List;
 
 public record AtaxxBoard(List<AtaxxRow> rows) {
+	public static final AtaxxBoard EMPTY_BOARD = new AtaxxBoard(AtaxxRow.EMPTY_LIST);
+
 	public static AtaxxBoard of(String board) {
 		final var rows = board.lines().map(AtaxxRow::of).toList();
 		return new AtaxxBoard(rows);
