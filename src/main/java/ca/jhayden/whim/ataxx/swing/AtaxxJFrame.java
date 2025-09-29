@@ -98,7 +98,12 @@ class PerformAiMoveTask implements Runnable {
 		final GameMove move = moveFinder.call();
 
 		try {
-			TimeUnit.SECONDS.sleep(2);
+			if (move == GameMove.PASS) {
+				TimeUnit.MILLISECONDS.sleep(500);
+			}
+			else {
+				TimeUnit.SECONDS.sleep(2);
+			}
 		}
 		catch (InterruptedException e) {
 			e.printStackTrace();
