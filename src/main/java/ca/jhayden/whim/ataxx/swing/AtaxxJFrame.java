@@ -43,10 +43,11 @@ public class AtaxxJFrame extends JFrame implements GameHub {
 	}
 
 	@Override
-	public void startNewGame() {
+	public void startNewGame(int numberOfPlayers) {
 		this.getContentPane().remove(setupPanel);
 		this.getContentPane().add(gamePanel, BorderLayout.CENTER);
-		state = GameEngine.newGame();
+		this.scorePanel.startNewGame(numberOfPlayers);
+		state = GameEngine.newGame(numberOfPlayers);
 		this.updateGameState(state);
 	}
 

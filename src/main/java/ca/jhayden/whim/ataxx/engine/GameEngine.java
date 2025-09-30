@@ -19,20 +19,42 @@ import ca.jhayden.whim.ataxx.model.Scores;
 import ca.jhayden.whim.ataxx.model.Tile;
 
 public class GameEngine {
-	public static AtaxxState newGame() {
-		List<Player> players = Collections.unmodifiableList(List.of(new Player(Tile.PIECE_1, true), //
-				new Player(Tile.PIECE_2, false), //
-				new Player(Tile.PIECE_3, false), //
-				new Player(Tile.PIECE_4, false) //
-		));
-		AtaxxBoard board = AtaxxBoard.of("""
-				1.....2
-				.......
-				.......
-				...#...
-				.......
-				.......
-				3.....4""");
+	public static AtaxxState newGame(int numberOfPlayers) {
+		final List<Player> players;
+		final AtaxxBoard board;
+
+		if (numberOfPlayers == 2) {
+			players = Collections.unmodifiableList(List.of(new Player(Tile.PIECE_1, true), //
+					new Player(Tile.PIECE_2, false) //
+			));
+			board = AtaxxBoard.of("""
+					1.....2
+					.......
+					.......
+					.#.#..#
+					.......
+					.......
+					2.....1""");
+		}
+		else if (numberOfPlayers == 4) {
+			players = Collections.unmodifiableList(List.of(new Player(Tile.PIECE_1, true), //
+					new Player(Tile.PIECE_2, false), //
+					new Player(Tile.PIECE_3, false), //
+					new Player(Tile.PIECE_4, false) //
+			));
+			board = AtaxxBoard.of("""
+					1.....2
+					.......
+					.......
+					...#...
+					.......
+					.......
+					3.....4""");
+		}
+		else {
+			throw new IllegalArgumentException("No support for " + numberOfPlayers + " player(s).");
+		}
+
 		return new AtaxxState(players, board);
 	}
 
@@ -112,7 +134,7 @@ public class GameEngine {
 				}
 
 				for (MoveType mt : MoveType.values()) {
-					GameMove move = new GameMove(startPos, mt);
+					GameMove move = new GameMove(state.currentPlayer().tile(), startPos, mt);
 					boolean valid = isValidMove(state, move);
 					if (valid) {
 						Pos endPos = startPos.translate(move.move());

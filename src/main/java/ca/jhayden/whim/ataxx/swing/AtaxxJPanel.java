@@ -106,9 +106,6 @@ public class AtaxxJPanel extends JPanel implements MouseMotionListener, MouseLis
 	@Override
 	public void mouseClicked(MouseEvent e) {
 		final Tile cursorTile = this.state.board().at(this.cursorPos);
-		System.out.println("");
-		System.out.println(this.state);
-		System.out.println(startPos + ", " + cursorPos + ": " + cursorTile);
 
 		if (this.startPos == null) {
 			if (cursorTile == this.playerTile) {
@@ -119,7 +116,7 @@ public class AtaxxJPanel extends JPanel implements MouseMotionListener, MouseLis
 			this.startPos = null;
 		}
 		else if (cursorTile == Tile.EMPTY) {
-			GameMove possibleMove = GameMove.of(this.startPos, this.cursorPos);
+			GameMove possibleMove = GameMove.of(this.playerTile, this.startPos, this.cursorPos);
 			if (possibleMove != null) {
 				this.startPos = null;
 				this.gameHub.move(possibleMove, this);

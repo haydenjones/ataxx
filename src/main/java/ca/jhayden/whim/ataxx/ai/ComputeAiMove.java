@@ -12,7 +12,7 @@ public class ComputeAiMove {
 	}
 
 	public GameMove call() {
-		GameTree tree = new GameTree(state, 1);
+		GameTree tree = new GameTree(state, 2);
 		return tree.findBestMove(state.currentPlayer().tile());
 	}
 

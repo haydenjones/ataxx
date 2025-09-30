@@ -6,12 +6,13 @@ import ca.jhayden.whim.ataxx.model.AtaxxState;
 import ca.jhayden.whim.ataxx.model.GameMove;
 import ca.jhayden.whim.ataxx.model.MoveType;
 import ca.jhayden.whim.ataxx.model.Pos;
+import ca.jhayden.whim.ataxx.model.Tile;
 
 public class GameMoveTest {
 	@Test
 	public void works() {
-		AtaxxState state = GameEngine.newGame();
-		GameMove move = new GameMove(new Pos(0, 0), MoveType.DR);
+		AtaxxState state = GameEngine.newGame(2);
+		GameMove move = new GameMove(Tile.PIECE_1, new Pos(0, 0), MoveType.DR);
 		state = GameEngine.applyMove(state, move);
 	}
 }

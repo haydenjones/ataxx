@@ -13,6 +13,8 @@ import ca.jhayden.whim.ataxx.model.Scores;
 import ca.jhayden.whim.ataxx.model.Tile;
 
 public class GameTree {
+	private static final int WORST_POSSIBLE_SCORE = -99;
+
 	private static final List<GameTree> EMPTY_LIST = Collections.emptyList();
 
 	private final GameMove move;
@@ -46,19 +48,28 @@ public class GameTree {
 		}
 	}
 
-	public int findBestScore(Tile playerTile) {
-		Scores s = this.state.computeScores();
-		int score = 0;
-		score = score + ((playerTile == Tile.PIECE_1) ? s.piece1() : -s.piece1());
-		score = score + ((playerTile == Tile.PIECE_2) ? s.piece2() : -s.piece2());
-		score = score + ((playerTile == Tile.PIECE_3) ? s.piece3() : -s.piece3());
-		score = score + ((playerTile == Tile.PIECE_4) ? s.piece4() : -s.piece4());
-
+	// In general the algorithm is like...
+	// If I have no kids then
+	// Look at each of my kids and select the move that the current player would
+	// make.
+	int findBestScore() {
 		if (this.children.isEmpty()) {
+			final Tile playerTile = this.state.currentPlayer().tile();
+			Scores s = this.state.computeScores();
+			int score = 0;
+			score = score + ((playerTile == Tile.PIECE_1) ? s.piece1() : -s.piece1());
+			score = score + ((playerTile == Tile.PIECE_2) ? s.piece2() : -s.piece2());
+			score = score + ((playerTile == Tile.PIECE_3) ? s.piece3() : -s.piece3());
+			score = score + ((playerTile == Tile.PIECE_4) ? s.piece4() : -s.piece4());
 			return score;
 		}
 
-		return score;
+		int bestScore = WORST_POSSIBLE_SCORE;
+		for (GameTree child : this.children) {
+			bestScore = Math.max(bestScore, child.findBestScore());
+		}
+
+		return bestScore;
 	}
 
 	public GameMove findBestMove(Tile tile) {
@@ -68,10 +79,10 @@ public class GameTree {
 		}
 
 		List<GameMove> bestMoves = new ArrayList<>();
-		int bestScore = -99;
+		int bestScore = WORST_POSSIBLE_SCORE;
 
 		for (GameTree tree : children) {
-			int best = tree.findBestScore(tile);
+			int best = tree.findBestScore();
 			if (best > bestScore) {
 				bestScore = best;
 				bestMoves.clear();
