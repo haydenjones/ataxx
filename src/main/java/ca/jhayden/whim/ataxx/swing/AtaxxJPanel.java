@@ -99,6 +99,7 @@ public class AtaxxJPanel extends JPanel implements MouseMotionListener, MouseLis
 	}
 
 	public void update(AtaxxState state, boolean gameOver) {
+		System.out.println(state);
 		this.state = state;
 		this.repaint();
 	}

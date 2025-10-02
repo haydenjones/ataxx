@@ -4,15 +4,26 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
-import java.util.SortedSet;
 
-import ca.jhayden.whim.ataxx.engine.GameEngine;
 import ca.jhayden.whim.ataxx.model.AtaxxState;
 import ca.jhayden.whim.ataxx.model.GameMove;
 import ca.jhayden.whim.ataxx.model.Scores;
 import ca.jhayden.whim.ataxx.model.Tile;
 
 public class GameTree {
+	static int scoreFor(Scores s, Tile playerTile) {
+		int score = 0;
+		score = score + ((playerTile == Tile.PIECE_1) ? s.piece1() : -s.piece1());
+		score = score + ((playerTile == Tile.PIECE_2) ? s.piece2() : -s.piece2());
+		score = score + ((playerTile == Tile.PIECE_3) ? s.piece3() : -s.piece3());
+		score = score + ((playerTile == Tile.PIECE_4) ? s.piece4() : -s.piece4());
+		return score;
+	}
+
+	public static GameTree of(GameTreeBuilder builder) {
+		return new GameTree(builder);
+	}
+
 	private static final int WORST_POSSIBLE_SCORE = -99;
 
 	private static final List<GameTree> EMPTY_LIST = Collections.emptyList();
@@ -20,81 +31,88 @@ public class GameTree {
 	private final GameMove move;
 	private final AtaxxState state;
 	private final List<GameTree> children;
+	private final Tile currentPlayerTile;
 
-	public GameTree(AtaxxState state, int depth) {
-		this.move = null;
-		this.state = state;
-		this.children = new ArrayList<>();
+	private Scores score = null;
 
-		if (depth > 0) {
-			SortedSet<GameMove> moves = GameEngine.computeAllMoves(state);
-			for (GameMove gm : moves) {
-				children.add(new GameTree(gm, GameEngine.applyMove(state, gm), depth - 1));
-			}
-		}
-	}
-
-	public GameTree(GameMove myMove, AtaxxState state, int depth) {
+	private GameTree(GameTreeBuilder builder) {
 		super();
-		this.move = myMove;
-		this.state = state;
-		this.children = (depth < 1) ? GameTree.EMPTY_LIST : new ArrayList<>();
+		this.move = builder.getMove();
+		this.state = builder.getState();
+		this.currentPlayerTile = builder.getState().currentPlayer().tile();
+		this.children = builder.getChildren().isEmpty() ? EMPTY_LIST : new ArrayList<>();
 
-		if (depth > 0) {
-			SortedSet<GameMove> moves = GameEngine.computeAllMoves(state);
-			for (GameMove gm : moves) {
-				children.add(new GameTree(gm, GameEngine.applyMove(state, gm), depth - 1));
+		for (GameTreeBuilder child : builder.getChildren()) {
+			this.children.add(new GameTree(child));
+		}
+
+		if (this.children.isEmpty()) {
+			this.score = builder.getState().computeScores();
+		}
+	}
+
+	void computeScoreTree() {
+		if (this.score != null) {
+			return;
+		}
+
+		// I'm going to need to compute all the scores for my kids.
+		for (GameTree gt : this.children) {
+			gt.computeScoreTree();
+		}
+
+		// Now that my kids all have Scores, I should look for the best one for me.
+		int bestScore = WORST_POSSIBLE_SCORE;
+		Scores bestChildScore = null;
+
+		for (GameTree gt : this.children) {
+			int gtScore = GameTree.scoreFor(gt.score, this.currentPlayerTile);
+			if (gtScore > bestScore) {
+				bestScore = gtScore;
+				bestChildScore = gt.score;
 			}
 		}
+
+		this.score = bestChildScore;
 	}
 
-	// In general the algorithm is like...
-	// If I have no kids then
-	// Look at each of my kids and select the move that the current player would
-	// make.
-	int findBestScore() {
-		if (this.children.isEmpty()) {
-			final Tile playerTile = this.state.currentPlayer().tile();
-			Scores s = this.state.computeScores();
-			int score = 0;
-			score = score + ((playerTile == Tile.PIECE_1) ? s.piece1() : -s.piece1());
-			score = score + ((playerTile == Tile.PIECE_2) ? s.piece2() : -s.piece2());
-			score = score + ((playerTile == Tile.PIECE_3) ? s.piece3() : -s.piece3());
-			score = score + ((playerTile == Tile.PIECE_4) ? s.piece4() : -s.piece4());
-			return score;
-		}
-
-		int bestScore = WORST_POSSIBLE_SCORE;
-		for (GameTree child : this.children) {
-			bestScore = Math.max(bestScore, child.findBestScore());
-		}
-
-		return bestScore;
-	}
-
-	public GameMove findBestMove(Tile tile) {
+	public GameMove findBestMove(boolean randomChoice) {
 		final int size = children.size();
 		if (size == 0) {
 			return GameMove.PASS;
 		}
 
-		List<GameMove> bestMoves = new ArrayList<>();
-		int bestScore = WORST_POSSIBLE_SCORE;
+		// Calculate Scores for all non-leaf nodes
+		computeScoreTree();
+
+		final List<GameMove> bestMoves = new ArrayList<>();
+		final int myBestScore = GameTree.scoreFor(this.score, this.state.currentPlayer().tile());
 
 		for (GameTree tree : children) {
-			int best = tree.findBestScore();
-			if (best > bestScore) {
-				bestScore = best;
-				bestMoves.clear();
-			}
-
-			if (best == bestScore) {
+			int treeScore = GameTree.scoreFor(tree.score, this.state.currentPlayer().tile());
+			if (myBestScore == treeScore) {
 				bestMoves.add(tree.move);
 			}
 		}
 
-		Random r = new Random();
-		int choose = r.nextInt(bestMoves.size());
+		Collections.sort(bestMoves);
+
+		final int choose;
+		if (randomChoice) {
+			Random r = new Random();
+			choose = r.nextInt(bestMoves.size());
+		}
+		else {
+			choose = 0;
+		}
+
 		return bestMoves.get(choose);
+	}
+
+	@Override
+	public String toString() {
+		return String.format("""
+				GameTree Player: %s, %d children
+				%s""", this.currentPlayerTile, this.children.size(), this.score);
 	}
 }
