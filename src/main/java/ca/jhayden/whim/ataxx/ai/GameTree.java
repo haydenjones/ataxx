@@ -11,6 +11,8 @@ import ca.jhayden.whim.ataxx.model.Scores;
 import ca.jhayden.whim.ataxx.model.Tile;
 
 public class GameTree {
+	static final Random RANDOM = new Random();
+
 	static int scoreFor(Scores s, Tile playerTile) {
 		int score = 0;
 		score = score + ((playerTile == Tile.PIECE_1) ? s.piece1() : -s.piece1());
@@ -24,7 +26,7 @@ public class GameTree {
 		return new GameTree(builder);
 	}
 
-	private static final int WORST_POSSIBLE_SCORE = -99;
+	private static final int WORST_POSSIBLE_SCORE = Integer.MIN_VALUE;
 
 	private static final List<GameTree> EMPTY_LIST = Collections.emptyList();
 
@@ -97,14 +99,7 @@ public class GameTree {
 
 		Collections.sort(bestMoves);
 
-		final int choose;
-		if (randomChoice) {
-			Random r = new Random();
-			choose = r.nextInt(bestMoves.size());
-		}
-		else {
-			choose = 0;
-		}
+		final int choose = randomChoice ? RANDOM.nextInt(bestMoves.size()) : 0;
 
 		return bestMoves.get(choose);
 	}

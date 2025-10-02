@@ -60,41 +60,41 @@ public class AtaxxJPanel extends JPanel implements MouseMotionListener, MouseLis
 
 	@Override
 	public void paint(Graphics g) {
-		final Graphics2D g2d = (Graphics2D) g;
+		if (g instanceof Graphics2D g2d) {
+			int rowPos = 0;
+			for (AtaxxRow row : state.board().rows()) {
 
-		int rowPos = 0;
-		for (AtaxxRow row : state.board().rows()) {
+				int colPos = 0;
+				for (Tile tile : row) {
+					g2d.setColor(Color.GRAY);
+					g2d.fillRect(SQUARE_LENGTH * colPos, SQUARE_LENGTH * rowPos, SQUARE_LENGTH, SQUARE_LENGTH);
 
-			int colPos = 0;
-			for (Tile tile : row) {
-				g2d.setColor(Color.GRAY);
-				g2d.fillRect(SQUARE_LENGTH * colPos, SQUARE_LENGTH * rowPos, SQUARE_LENGTH, SQUARE_LENGTH);
+					Pos pos = new Pos(rowPos, colPos);
+					if (pos.equals(this.startPos)) {
+						this.drawRect(g2d, pos, Color.GREEN);
+					}
+					else if (pos.equals(this.cursorPos)) {
+						this.drawRect(g2d, pos, Color.CYAN);
+					}
 
-				Pos pos = new Pos(rowPos, colPos);
-				if (pos.equals(this.startPos)) {
-					this.drawRect(g2d, pos, Color.GREEN);
-				}
-				else if (pos.equals(this.cursorPos)) {
-					this.drawRect(g2d, pos, Color.CYAN);
-				}
+					if (tile == Tile.WALL) {
+						fillRect(g2d, pos, Color.BLACK);
+					}
+					else {
+						fillRect(g2d, pos, Color.WHITE);
 
-				if (tile == Tile.WALL) {
-					fillRect(g2d, pos, Color.BLACK);
-				}
-				else {
-					fillRect(g2d, pos, Color.WHITE);
-
-					if (tile != null) {
-						if (tile.isPiece()) {
-							this.fillOval(g2d, pos, AtaxxJFrame.COLOR_MAP.get(tile));
+						if (tile != null) {
+							if (tile.isPiece()) {
+								this.fillOval(g2d, pos, AtaxxJFrame.COLOR_MAP.get(tile));
+							}
 						}
 					}
+
+					colPos++;
 				}
 
-				colPos++;
+				rowPos++;
 			}
-
-			rowPos++;
 		}
 	}
 

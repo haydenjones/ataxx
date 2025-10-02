@@ -1,5 +1,7 @@
 package ca.jhayden.whim.ataxx.engine;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import org.junit.jupiter.api.Test;
 
 import ca.jhayden.whim.ataxx.model.AtaxxState;
@@ -14,5 +16,6 @@ public class GameMoveTest {
 		AtaxxState state = GameEngine.newGame(2);
 		GameMove move = new GameMove(Tile.PIECE_1, new Pos(0, 0), MoveType.DR);
 		state = GameEngine.applyMove(state, move);
+		assertNotNull(state);
 	}
 }
