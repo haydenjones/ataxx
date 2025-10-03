@@ -10,6 +10,7 @@ import javax.swing.SwingUtilities;
 
 import ca.jhayden.whim.ataxx.ai.ComputeAiMove;
 import ca.jhayden.whim.ataxx.engine.GameEngine;
+import ca.jhayden.whim.ataxx.engine.GameSetup;
 import ca.jhayden.whim.ataxx.model.AtaxxState;
 import ca.jhayden.whim.ataxx.model.GameMove;
 import ca.jhayden.whim.ataxx.model.Tile;
@@ -31,6 +32,7 @@ public class AtaxxJFrame extends JFrame implements GameHub {
 	private final AtaxxSetupGame setupPanel = new AtaxxSetupGame(this);
 	private final AtaxxJPanel gamePanel = new AtaxxJPanel(this, Tile.PIECE_1);
 
+	private GameSetup gameSetup = null;
 	private AtaxxState state = null;
 
 	public AtaxxJFrame() {
@@ -43,11 +45,14 @@ public class AtaxxJFrame extends JFrame implements GameHub {
 	}
 
 	@Override
-	public void startNewGame(int numberOfPlayers) {
+	public void startNewGame(GameSetup setup) {
+		this.gameSetup = setup;
+		this.scorePanel.startNewGame(setup.getNumberOfPlayers().value());
+		this.state = GameEngine.newGame(setup);
+
 		this.getContentPane().remove(setupPanel);
 		this.getContentPane().add(gamePanel, BorderLayout.CENTER);
-		this.scorePanel.startNewGame(numberOfPlayers);
-		state = GameEngine.newGame(numberOfPlayers);
+
 		this.updateGameState(state);
 	}
 
@@ -74,7 +79,7 @@ public class AtaxxJFrame extends JFrame implements GameHub {
 
 			if (!GameEngine.isGameOver(newState)) {
 				if (!newState.currentPlayer().isHuman()) {
-					PerformAiMoveTask task = new PerformAiMoveTask(this, newState);
+					PerformAiMoveTask task = new PerformAiMoveTask(this, newState, this.gameSetup.getAiType().value());
 					Thread t = new Thread(task);
 					t.start();
 				}
@@ -86,16 +91,18 @@ public class AtaxxJFrame extends JFrame implements GameHub {
 class PerformAiMoveTask implements Runnable {
 	private final GameHub gameHub;
 	private final AtaxxState state;
+	private final int depth;
 
-	public PerformAiMoveTask(GameHub gh, AtaxxState newState) {
+	public PerformAiMoveTask(GameHub gh, AtaxxState newState, int depth) {
 		super();
 		this.gameHub = gh;
 		this.state = newState;
+		this.depth = depth;
 	}
 
 	@Override
 	public void run() {
-		ComputeAiMove moveFinder = new ComputeAiMove(state);
+		ComputeAiMove moveFinder = new ComputeAiMove(state, depth, true);
 		final GameMove move = moveFinder.call();
 
 		try {

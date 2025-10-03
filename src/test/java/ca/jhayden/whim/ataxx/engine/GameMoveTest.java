@@ -13,7 +13,7 @@ import ca.jhayden.whim.ataxx.model.Tile;
 public class GameMoveTest {
 	@Test
 	public void works() {
-		AtaxxState state = GameEngine.newGame(2);
+		AtaxxState state = GameEngine.newGame(GameSetupType.TWO_PLAYER_SIMPLE);
 		GameMove move = new GameMove(Tile.PIECE_1, new Pos(0, 0), MoveType.DR);
 		state = GameEngine.applyMove(state, move);
 		assertNotNull(state);

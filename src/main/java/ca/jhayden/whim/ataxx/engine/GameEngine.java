@@ -8,6 +8,7 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import ca.jhayden.whim.ataxx.engine.GameSetup.NumberOfPlayers;
 import ca.jhayden.whim.ataxx.model.AtaxxBoard;
 import ca.jhayden.whim.ataxx.model.AtaxxRow;
 import ca.jhayden.whim.ataxx.model.AtaxxState;
@@ -19,11 +20,11 @@ import ca.jhayden.whim.ataxx.model.Scores;
 import ca.jhayden.whim.ataxx.model.Tile;
 
 public class GameEngine {
-	public static AtaxxState newGame(int numberOfPlayers) {
+	public static AtaxxState newGame(GameSetup setup) {
 		final List<Player> players;
 		final AtaxxBoard board;
 
-		if (numberOfPlayers == 2) {
+		if (setup.getNumberOfPlayers() == NumberOfPlayers.TWO) {
 			players = Collections.unmodifiableList(List.of(new Player(Tile.PIECE_1, true), //
 					new Player(Tile.PIECE_2, false) //
 			));
@@ -36,7 +37,7 @@ public class GameEngine {
 					.......
 					2.....1""");
 		}
-		else if (numberOfPlayers == 4) {
+		else if (setup.getNumberOfPlayers() == NumberOfPlayers.FOUR) {
 			players = Collections.unmodifiableList(List.of(new Player(Tile.PIECE_1, true), //
 					new Player(Tile.PIECE_2, false), //
 					new Player(Tile.PIECE_3, false), //
@@ -52,7 +53,7 @@ public class GameEngine {
 					3.....4""");
 		}
 		else {
-			throw new IllegalArgumentException("No support for " + numberOfPlayers + " player(s).");
+			throw new IllegalArgumentException("No support for " + setup + " player(s).");
 		}
 
 		return new AtaxxState(players, board);

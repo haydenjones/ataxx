@@ -6,28 +6,43 @@ import java.awt.event.ActionListener;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 
+import ca.jhayden.whim.ataxx.engine.GameSetupType;
+
 public class AtaxxSetupGame extends JPanel implements ActionListener {
 	private static final long serialVersionUID = 3270638458907465976L;
-
-	private final JButton b2 = new JButton("You against the AI");
-	private final JButton b4 = new JButton("You against 3 AI");
 
 	private final GameHub gameHub;
 
 	public AtaxxSetupGame(GameHub hub) {
 		super();
 		this.gameHub = hub;
-		this.add(b2);
-		this.add(b4);
 
-		// Add Listeners
-		b2.addActionListener(this);
-		b4.addActionListener(this);
+		for (GameSetupType gst : GameSetupType.values()) {
+			JButton jb = new GameSetupJButton(gst);
+			this.add(jb);
+			jb.addActionListener(this);
+		}
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent event) {
-		int numberOfPlayers = (event.getSource() == b2) ? 2 : 4;
-		gameHub.startNewGame(numberOfPlayers);
+		if (event.getSource() instanceof GameSetupJButton gsb) {
+			gameHub.startNewGame(gsb.getGameSetupType());
+		}
+	}
+}
+
+class GameSetupJButton extends JButton {
+	private static final long serialVersionUID = 1L;
+
+	private final GameSetupType gameSetupType;
+
+	public GameSetupJButton(GameSetupType gst) {
+		super(gst.name());
+		gameSetupType = gst;
+	}
+
+	GameSetupType getGameSetupType() {
+		return gameSetupType;
 	}
 }
