@@ -3,6 +3,7 @@ package ca.jhayden.whim.ataxx.swing;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.util.EnumMap;
+import java.util.SortedSet;
 import java.util.concurrent.TimeUnit;
 
 import javax.swing.JFrame;
@@ -68,6 +69,14 @@ public class AtaxxJFrame extends JFrame implements GameHub {
 		scorePanel.update(newState, gameOver);
 		this.pack();
 		this.repaint();
+
+		// If the player is human and they don't have a move, then PASS.
+		if (newState.currentPlayer().isHuman()) {
+			SortedSet<GameMove> playerMoves = GameEngine.computeAllMoves(newState);
+			if (playerMoves.isEmpty()) {
+				this.move(GameMove.PASS, null);
+			}
+		}
 	}
 
 	@Override
