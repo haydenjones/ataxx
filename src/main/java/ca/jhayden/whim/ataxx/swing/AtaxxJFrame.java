@@ -14,6 +14,8 @@ import ca.jhayden.whim.ataxx.engine.GameEngine;
 import ca.jhayden.whim.ataxx.engine.GameSetup;
 import ca.jhayden.whim.ataxx.model.AtaxxState;
 import ca.jhayden.whim.ataxx.model.GameMove;
+import ca.jhayden.whim.ataxx.model.Player;
+import ca.jhayden.whim.ataxx.model.Scores;
 import ca.jhayden.whim.ataxx.model.Tile;
 
 public class AtaxxJFrame extends JFrame implements GameHub {
@@ -62,7 +64,31 @@ public class AtaxxJFrame extends JFrame implements GameHub {
 
 		boolean gameOver = GameEngine.isGameOver(newState);
 		if (gameOver) {
+			int bestHumanScore = 0;
+			int bestComputerScore = 0;
+			Scores score = newState.computeScores();
+			for (Player p : newState.players()) {
+				if (p.isHuman()) {
+					bestHumanScore = Math.max(bestHumanScore, score.forPiece(p.tile()));
+				}
+				else {
+					bestComputerScore = Math.max(bestComputerScore, score.forPiece(p.tile()));
+				}
+			}
+
+			final String message;
+			if (bestHumanScore > bestComputerScore) {
+				message = "You won";
+			}
+			else if (bestHumanScore == bestComputerScore) {
+				message = "You tied";
+			}
+			else {
+				message = "You lost";
+			}
+
 			System.out.println("G A M E _ O V E R");
+			System.out.println(message);
 		}
 
 		gamePanel.update(newState, gameOver);

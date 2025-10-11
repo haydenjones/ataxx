@@ -4,18 +4,20 @@ A java implementation of the strategy game.
 
 ## Philosophical Approach
 
->Blackadder: Baldrick, why are you dressed like that?
+>**Blackadder:** Baldrick, why are you dressed like that?
 >
->Baldrick: Do you want the long answer or the short answer?
+>**Baldrick:** Do you want the long answer or the short answer?
 >
->Blackadder: Mm, the short answer.
+>**Blackadder:** Mm, the short answer.
 >
->Baldrick: Whim.
+>**Baldrick:** Whim.
 >
->Blackadder: *Whim*. And the long answer?
+>**Blackadder:** *Whim*. And the long answer?
 >
->Baldrick: It was a whim, my lord.
+>**Baldrick:** It was a whim, my lord.
 
 ## To do
 
-* Make sure the UI handles the case where the player does not have any more moves.
+* Set a main class for the jar file.
+* Declare a winner when the game ends.
+* Enhance the UI with animations.

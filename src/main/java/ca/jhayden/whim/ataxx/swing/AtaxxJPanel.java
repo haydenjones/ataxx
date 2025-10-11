@@ -47,6 +47,8 @@ public class AtaxxJPanel extends JPanel implements MouseMotionListener, MouseLis
 	void drawRect(Graphics2D g2d, Pos pos, Color c) {
 		g2d.setColor(c);
 		g2d.drawRect(SQUARE_LENGTH * pos.col(), SQUARE_LENGTH * pos.row(), SQUARE_LENGTH, SQUARE_LENGTH);
+		g2d.drawRect(SQUARE_LENGTH * pos.col() + 1, SQUARE_LENGTH * pos.row() + 1, SQUARE_LENGTH - 2,
+				SQUARE_LENGTH - 2);
 	}
 
 	void fillOval(Graphics2D g2d, Pos pos, Color c) {
