@@ -26,12 +26,18 @@ public record Scores(int piece1, int piece2, int piece3, int piece4) {
 		return new Scores(p1, p2, p3, p4);
 	}
 
-	public int forPiece(Tile tile) {
+	public int count(Tile tile) {
 		if (Tile.PIECE_1 == tile) {
-			return piece1() - piece2();
+			return piece1();
 		}
-		else if (Tile.PIECE_2 == tile) {
-			return piece2() - piece1();
+		if (Tile.PIECE_2 == tile) {
+			return piece2();
+		}
+		if (Tile.PIECE_3 == tile) {
+			return piece3();
+		}
+		if (Tile.PIECE_4 == tile) {
+			return piece4();
 		}
 		return 0;
 	}
