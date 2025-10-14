@@ -15,6 +15,7 @@ import ca.jhayden.whim.ataxx.model.AtaxxState;
 import ca.jhayden.whim.ataxx.model.GameMove;
 import ca.jhayden.whim.ataxx.model.Pos;
 import ca.jhayden.whim.ataxx.model.Tile;
+import ca.jhayden.whim.ataxx.ui.GameHub;
 
 public class AtaxxJPanel extends JPanel implements MouseMotionListener, MouseListener {
 	private static final int SQUARE_LENGTH = 60;

@@ -19,6 +19,7 @@ import ca.jhayden.whim.ataxx.model.GameMove;
 import ca.jhayden.whim.ataxx.model.Player;
 import ca.jhayden.whim.ataxx.model.Scores;
 import ca.jhayden.whim.ataxx.model.Tile;
+import ca.jhayden.whim.ataxx.ui.GameHub;
 
 public class AtaxxJFrame extends JFrame implements GameHub {
 	private static final long serialVersionUID = 5990472863772348300L;

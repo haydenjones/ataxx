@@ -7,6 +7,7 @@ import javax.swing.JButton;
 import javax.swing.JPanel;
 
 import ca.jhayden.whim.ataxx.engine.GameSetupType;
+import ca.jhayden.whim.ataxx.ui.GameHub;
 
 public class AtaxxSetupGame extends JPanel implements ActionListener {
 	private static final long serialVersionUID = 3270638458907465976L;

@@ -1,4 +1,4 @@
-package ca.jhayden.whim.ataxx.swing;
+package ca.jhayden.whim.ataxx.ui;
 
 import ca.jhayden.whim.ataxx.engine.GameSetup;
 import ca.jhayden.whim.ataxx.model.GameMove;
