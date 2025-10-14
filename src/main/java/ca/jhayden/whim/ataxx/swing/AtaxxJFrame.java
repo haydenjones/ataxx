@@ -160,8 +160,21 @@ class PerformAiMoveTask implements Runnable {
 		ComputeAiMove moveFinder = new ComputeAiMove(state, depth, true);
 		final GameMove move = moveFinder.call();
 
+		boolean humanAlive = false;
+		Scores score = state.computeScores();
+		for (Player p : state.players()) {
+			if (p.isHuman()) {
+				if (score.count(p.tile()) > 0) {
+					humanAlive = true;
+				}
+			}
+		}
+
 		try {
-			if (move == GameMove.PASS) {
+			if (!humanAlive) {
+				TimeUnit.MILLISECONDS.sleep(250);
+			}
+			else if (move == GameMove.PASS) {
 				TimeUnit.MILLISECONDS.sleep(500);
 			}
 			else {
