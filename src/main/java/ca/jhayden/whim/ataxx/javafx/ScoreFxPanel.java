@@ -1,58 +1,56 @@
 package ca.jhayden.whim.ataxx.javafx;
 
-import javafx.fxml.FXML;
 import javafx.scene.control.Label;
+import javafx.scene.layout.HBox;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 
 import ca.jhayden.whim.ataxx.model.AtaxxState;
 import ca.jhayden.whim.ataxx.model.Scores;
+import ca.jhayden.whim.ataxx.model.Tile;
 
-public class ScoreFxPanel {
-    @FXML private Label player1Score;
-    @FXML private Label player2Score;
-    @FXML private Label player3Score;
-    @FXML private Label player4Score;
-    @FXML private Label currentPlayerLabel;
-
-    public void startNewGame(int numberOfPlayers) {
-        player1Score.setText("Red: 2");
-        player2Score.setText("Blue: 2");
-        
-        if (numberOfPlayers == 4) {
-            player3Score.setText("Magenta: 2");
-            player3Score.setVisible(true);
-            player4Score.setText("Orange: 2");
-            player4Score.setVisible(true);
-        } else {
-            player3Score.setVisible(false);
-            player4Score.setVisible(false);
+public class ScoreFxPanel extends HBox {
+    
+    private final Label[] scoreLabels = new Label[4];
+    private final String[] colorNames = {"RED", "BLUE", "MAGENTA", "ORANGE"};
+    private final Color[] colors = {Color.RED, Color.BLUE, Color.MAGENTA, Color.ORANGE};
+    
+    public ScoreFxPanel() {
+        setSpacing(20);
+        for (int i = 0; i < 4; i++) {
+            scoreLabels[i] = new Label();
+            scoreLabels[i].setFont(Font.font("Arial", FontWeight.BOLD, 14));
         }
-        
-        currentPlayerLabel.setText("Current: Red");
     }
-
+    
+    public void startNewGame(int numberOfPlayers) {
+        getChildren().clear();
+        for (int i = 0; i < numberOfPlayers; i++) {
+            getChildren().add(scoreLabels[i]);
+        }
+    }
+    
     public void update(AtaxxState state, boolean gameOver) {
         Scores scores = state.computeScores();
-        player1Score.setText("Red: " + scores.piece1());
-        player2Score.setText("Blue: " + scores.piece2());
+        Tile currentPlayerTile = state.currentPlayer().tile();
         
-        if (state.players().size() == 4) {
-            player3Score.setText("Magenta: " + scores.piece3());
-            player4Score.setText("Orange: " + scores.piece4());
-        }
+        Tile[] tiles = {Tile.PIECE_1, Tile.PIECE_2, Tile.PIECE_3, Tile.PIECE_4};
         
-        if (!gameOver) {
-            String currentPlayer = switch (state.currentPlayer().tile()) {
-                case PIECE_1 -> "Red";
-                case PIECE_2 -> "Blue";
-                case PIECE_3 -> "Magenta";
-                case PIECE_4 -> "Orange";
-                default -> "Unknown";
-            };
-            currentPlayerLabel.setText("Current: " + currentPlayer);
-        } else {
-            currentPlayerLabel.setText("Game Over!");
+        for (int i = 0; i < scoreLabels.length; i++) {
+            if (scoreLabels[i].getParent() != null) {
+                int score = scores.count(tiles[i]);
+                String text = colorNames[i] + ": " + score;
+                scoreLabels[i].setText(text);
+                
+                if (tiles[i] == currentPlayerTile && !gameOver) {
+                    scoreLabels[i].setTextFill(colors[i]);
+                    scoreLabels[i].setStyle("-fx-background-color: lightgray; -fx-padding: 5;");
+                } else {
+                    scoreLabels[i].setTextFill(Color.BLACK);
+                    scoreLabels[i].setStyle("-fx-padding: 5;");
+                }
+            }
         }
     }
-
-
 }

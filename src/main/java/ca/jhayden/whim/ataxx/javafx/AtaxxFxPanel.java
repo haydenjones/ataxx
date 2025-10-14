@@ -1,11 +1,9 @@
 package ca.jhayden.whim.ataxx.javafx;
 
-import javafx.scene.Parent;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Circle;
-import javafx.scene.shape.Rectangle;
 
 import ca.jhayden.whim.ataxx.model.AtaxxRow;
 import ca.jhayden.whim.ataxx.model.AtaxxState;
@@ -14,112 +12,106 @@ import ca.jhayden.whim.ataxx.model.Pos;
 import ca.jhayden.whim.ataxx.model.Tile;
 import ca.jhayden.whim.ataxx.ui.GameHub;
 
-public class AtaxxFxPanel {
+public class AtaxxFxPanel extends Canvas {
     private static final int SQUARE_SIZE = 60;
-    private final GridPane grid = new GridPane();
+    private static final int GAP = 4;
+    
     private final GameHub gameHub;
     private final Tile playerTile;
-    
     private AtaxxState state = AtaxxState.NULL;
     private Pos startPos = null;
-
+    private Pos cursorPos = null;
+    
     public AtaxxFxPanel(GameHub hub, Tile myPlayerTile) {
+        super(SQUARE_SIZE * 7, SQUARE_SIZE * 7);
         this.gameHub = hub;
         this.playerTile = myPlayerTile;
-        setupGrid();
-    }
-
-    private void setupGrid() {
-        grid.setHgap(2);
-        grid.setVgap(2);
         
-        for (int row = 0; row < 7; row++) {
-            for (int col = 0; col < 7; col++) {
-                Rectangle square = new Rectangle(SQUARE_SIZE, SQUARE_SIZE);
-                square.setFill(Color.WHITE);
-                square.setStroke(Color.GRAY);
-                
-                final int r = row, c = col;
-                square.setOnMouseClicked(e -> handleClick(new Pos(r, c)));
-                
-                grid.add(square, col, row);
-            }
-        }
+        setOnMouseClicked(this::handleMouseClick);
+        setOnMouseMoved(this::handleMouseMove);
     }
-
-    private void handleClick(Pos pos) {
-        if (!state.currentPlayer().isHuman() || state.currentPlayer().tile() != playerTile) {
-            return;
-        }
-
-        Tile cursorTile = state.board().at(pos);
-
+    
+    private void handleMouseClick(MouseEvent e) {
+        if (cursorPos == null) return;
+        
+        Tile cursorTile = state.board().at(cursorPos);
+        
         if (startPos == null) {
             if (cursorTile == playerTile) {
-                startPos = pos;
-                updateDisplay();
+                startPos = cursorPos;
             }
-        } else if (startPos.equals(pos)) {
+        } else if (startPos.equals(cursorPos)) {
             startPos = null;
-            updateDisplay();
         } else if (cursorTile == Tile.EMPTY) {
-            GameMove move = GameMove.of(playerTile, startPos, pos);
+            GameMove move = GameMove.of(playerTile, startPos, cursorPos);
             if (move != null) {
                 startPos = null;
                 gameHub.move(move, this);
             }
         }
+        
+        draw();
     }
-
+    
+    private void handleMouseMove(MouseEvent e) {
+        cursorPos = new Pos((int)(e.getY() / SQUARE_SIZE), (int)(e.getX() / SQUARE_SIZE));
+        draw();
+    }
+    
     public void update(AtaxxState state, boolean gameOver) {
         this.state = state;
-        updateDisplay();
+        draw();
     }
-
-    private void updateDisplay() {
-        if (state == AtaxxState.NULL) return;
-
+    
+    private void draw() {
+        GraphicsContext gc = getGraphicsContext2D();
+        gc.clearRect(0, 0, getWidth(), getHeight());
+        
         int rowPos = 0;
         for (AtaxxRow row : state.board().rows()) {
             int colPos = 0;
             for (Tile tile : row) {
-                Rectangle square = (Rectangle) grid.getChildren().get(rowPos * 7 + colPos);
-                Pos pos = new Pos(rowPos, colPos);
-
-                if (tile == Tile.WALL) {
-                    square.setFill(Color.BLACK);
-                } else {
-                    square.setFill(Color.WHITE);
-                }
-
-                if (pos.equals(startPos)) {
-                    square.setStroke(Color.GREEN);
-                    square.setStrokeWidth(3);
-                } else {
-                    square.setStroke(Color.GRAY);
-                    square.setStrokeWidth(1);
-                }
-
-                final int finalRow = rowPos;
-                final int finalCol = colPos;
-                grid.getChildren().removeIf(node -> 
-                    GridPane.getRowIndex(node) != null && GridPane.getRowIndex(node) == finalRow && 
-                    GridPane.getColumnIndex(node) != null && GridPane.getColumnIndex(node) == finalCol && 
-                    node instanceof Circle);
-
-                if (tile.isPiece()) {
-                    Circle piece = new Circle(SQUARE_SIZE / 3);
-                    piece.setFill(getTileColor(tile));
-                    piece.setMouseTransparent(true);
-                    grid.add(piece, colPos, rowPos);
-                }
-
+                drawSquare(gc, new Pos(rowPos, colPos), tile);
                 colPos++;
             }
             rowPos++;
         }
     }
-
+    
+    private void drawSquare(GraphicsContext gc, Pos pos, Tile tile) {
+        double x = pos.col() * SQUARE_SIZE;
+        double y = pos.row() * SQUARE_SIZE;
+        
+        // Background
+        gc.setFill(Color.LIGHTGRAY);
+        gc.fillRect(x, y, SQUARE_SIZE, SQUARE_SIZE);
+        
+        // Highlight selected/cursor positions
+        if (pos.equals(startPos)) {
+            gc.setStroke(Color.GREEN);
+            gc.setLineWidth(3);
+            gc.strokeRect(x, y, SQUARE_SIZE, SQUARE_SIZE);
+        } else if (pos.equals(cursorPos)) {
+            gc.setStroke(Color.CYAN);
+            gc.setLineWidth(2);
+            gc.strokeRect(x, y, SQUARE_SIZE, SQUARE_SIZE);
+        }
+        
+        // Tile content
+        if (tile == Tile.WALL) {
+            gc.setFill(Color.BLACK);
+            gc.fillRect(x + GAP, y + GAP, SQUARE_SIZE - 2*GAP, SQUARE_SIZE - 2*GAP);
+        } else {
+            gc.setFill(Color.WHITE);
+            gc.fillRect(x + GAP, y + GAP, SQUARE_SIZE - 2*GAP, SQUARE_SIZE - 2*GAP);
+            
+            if (tile != null && tile.isPiece()) {
+                gc.setFill(getTileColor(tile));
+                gc.fillOval(x + 2*GAP, y + 2*GAP, SQUARE_SIZE - 4*GAP, SQUARE_SIZE - 4*GAP);
+            }
+        }
+    }
+    
     private Color getTileColor(Tile tile) {
         return switch (tile) {
             case PIECE_1 -> Color.RED;
@@ -128,9 +120,5 @@ public class AtaxxFxPanel {
             case PIECE_4 -> Color.ORANGE;
             default -> Color.WHITE;
         };
-    }
-
-    public Parent getRoot() {
-        return grid;
     }
 }

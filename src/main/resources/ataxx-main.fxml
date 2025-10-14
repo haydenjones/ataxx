@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+
+<VBox xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ca.jhayden.whim.ataxx.javafx.AtaxxFxController">
+   <children>
+      <HBox fx:id="scorePanel" alignment="CENTER" spacing="10" style="-fx-padding: 10;" />
+      
+      <VBox fx:id="setupPanel" alignment="CENTER" spacing="10" style="-fx-padding: 10;">
+         <Label text="Select Game Mode:" style="-fx-font-size: 16; -fx-font-weight: bold;" />
+      </VBox>
+      
+      <VBox fx:id="gamePanel" alignment="CENTER" style="-fx-padding: 10;" visible="false" />
+   </children>
+</VBox>
