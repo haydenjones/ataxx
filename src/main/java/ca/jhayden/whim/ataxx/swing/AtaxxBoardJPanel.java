@@ -10,6 +10,7 @@ import java.awt.event.MouseMotionListener;
 
 import javax.swing.JPanel;
 
+import ca.jhayden.whim.ataxx.model.AtaxxChangeInfo;
 import ca.jhayden.whim.ataxx.model.AtaxxRow;
 import ca.jhayden.whim.ataxx.model.AtaxxState;
 import ca.jhayden.whim.ataxx.model.GameMove;
@@ -17,7 +18,7 @@ import ca.jhayden.whim.ataxx.model.Pos;
 import ca.jhayden.whim.ataxx.model.Tile;
 import ca.jhayden.whim.ataxx.ui.GameHub;
 
-public class AtaxxJPanel extends JPanel implements MouseMotionListener, MouseListener {
+public class AtaxxBoardJPanel extends JPanel implements AtaxxGui, MouseMotionListener, MouseListener {
 	private static final int SQUARE_LENGTH = 60;
 	private static final int SQUARE_GAP = 4;
 
@@ -30,7 +31,7 @@ public class AtaxxJPanel extends JPanel implements MouseMotionListener, MouseLis
 	private Pos startPos = null;
 	private Pos cursorPos = null;
 
-	public AtaxxJPanel(GameHub hub, Tile myPlayerTile) {
+	public AtaxxBoardJPanel(GameHub hub, Tile myPlayerTile) {
 		super();
 		gameHub = hub;
 		playerTile = myPlayerTile;
@@ -101,12 +102,6 @@ public class AtaxxJPanel extends JPanel implements MouseMotionListener, MouseLis
 		}
 	}
 
-	public void update(AtaxxState state, boolean gameOver) {
-		System.out.println(state);
-		this.state = state;
-		this.repaint();
-	}
-
 	@Override
 	public void mouseClicked(MouseEvent e) {
 		final Tile cursorTile = this.state.board().at(this.cursorPos);
@@ -152,7 +147,13 @@ public class AtaxxJPanel extends JPanel implements MouseMotionListener, MouseLis
 
 	@Override
 	public void mouseMoved(MouseEvent e) {
-		this.cursorPos = new Pos(e.getY() / AtaxxJPanel.SQUARE_LENGTH, e.getX() / AtaxxJPanel.SQUARE_LENGTH);
+		this.cursorPos = new Pos(e.getY() / AtaxxBoardJPanel.SQUARE_LENGTH, e.getX() / AtaxxBoardJPanel.SQUARE_LENGTH);
+		this.repaint();
+	}
+
+	@Override
+	public void update(AtaxxChangeInfo changeInfo) {
+		this.state = changeInfo.endState();
 		this.repaint();
 	}
 }

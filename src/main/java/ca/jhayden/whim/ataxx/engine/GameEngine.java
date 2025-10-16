@@ -1,5 +1,6 @@
 package ca.jhayden.whim.ataxx.engine;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -10,8 +11,10 @@ import java.util.TreeSet;
 
 import ca.jhayden.whim.ataxx.engine.GameSetup.NumberOfPlayers;
 import ca.jhayden.whim.ataxx.model.AtaxxBoard;
+import ca.jhayden.whim.ataxx.model.AtaxxChangeInfo;
 import ca.jhayden.whim.ataxx.model.AtaxxRow;
 import ca.jhayden.whim.ataxx.model.AtaxxState;
+import ca.jhayden.whim.ataxx.model.ChangeType;
 import ca.jhayden.whim.ataxx.model.GameMove;
 import ca.jhayden.whim.ataxx.model.MoveType;
 import ca.jhayden.whim.ataxx.model.Player;
@@ -20,13 +23,14 @@ import ca.jhayden.whim.ataxx.model.Scores;
 import ca.jhayden.whim.ataxx.model.Tile;
 
 public class GameEngine {
-	public static AtaxxState newGame(GameSetup setup) {
+	public static AtaxxChangeInfo newGame(GameSetup setup) {
 		final List<Player> players;
 		final AtaxxBoard board;
 
 		if (setup.getNumberOfPlayers() == NumberOfPlayers.TWO) {
-			players = Collections.unmodifiableList(List.of(new Player(Tile.PIECE_1, true), //
-					new Player(Tile.PIECE_2, false) //
+			players = Collections.unmodifiableList(List.of(//
+					new Player(Tile.PIECE_1, true, Color.RED, "Red"), //
+					new Player(Tile.PIECE_2, false, Color.BLUE, "Blue") //
 			));
 			board = AtaxxBoard.of("""
 					1.....2
@@ -38,10 +42,11 @@ public class GameEngine {
 					2.....1""");
 		}
 		else if (setup.getNumberOfPlayers() == NumberOfPlayers.FOUR) {
-			players = Collections.unmodifiableList(List.of(new Player(Tile.PIECE_1, true), //
-					new Player(Tile.PIECE_2, false), //
-					new Player(Tile.PIECE_3, false), //
-					new Player(Tile.PIECE_4, false) //
+			players = Collections.unmodifiableList(List.of( //
+					new Player(Tile.PIECE_1, true, Color.RED, "Red"), //
+					new Player(Tile.PIECE_2, false, Color.BLUE, "Blue"), //
+					new Player(Tile.PIECE_3, false, Color.MAGENTA, "Magenta"), //
+					new Player(Tile.PIECE_4, false, Color.ORANGE, "Orange") //
 			));
 			board = AtaxxBoard.of("""
 					1.....2
@@ -56,7 +61,7 @@ public class GameEngine {
 			throw new IllegalArgumentException("No support for " + setup + " player(s).");
 		}
 
-		return new AtaxxState(players, board);
+		return new AtaxxChangeInfo(ChangeType.START_NEW_GAME, new AtaxxState(players, board));
 	}
 
 	public static boolean isGameOver(AtaxxState state) {
@@ -152,7 +157,7 @@ public class GameEngine {
 		return out;
 	}
 
-	public static AtaxxState applyMove(AtaxxState state, GameMove move) {
+	public static AtaxxChangeInfo applyMove(AtaxxState state, GameMove move) {
 		// Advance the player
 		int index = state.players().indexOf(state.currentPlayer());
 		int nextPlayerIndex = (index + 1) % state.players().size();
@@ -195,6 +200,8 @@ public class GameEngine {
 			board = new AtaxxBoard(newRows);
 		}
 
-		return new AtaxxState(state.players(), board, nextPlayer);
+		var newState = new AtaxxState(state.players(), board, nextPlayer);
+		var changeType = GameEngine.isGameOver(newState) ? ChangeType.GAME_OVER : ChangeType.GAME_MOVE;
+		return new AtaxxChangeInfo(changeType, newState);
 	}
 }

@@ -9,12 +9,12 @@ import javax.swing.JPanel;
 import ca.jhayden.whim.ataxx.engine.GameSetupType;
 import ca.jhayden.whim.ataxx.ui.GameHub;
 
-public class AtaxxSetupGame extends JPanel implements ActionListener {
+public class AtaxxSetupGameJPanel extends JPanel implements ActionListener {
 	private static final long serialVersionUID = 3270638458907465976L;
 
 	private final GameHub gameHub;
 
-	public AtaxxSetupGame(GameHub hub) {
+	public AtaxxSetupGameJPanel(GameHub hub) {
 		super();
 		this.gameHub = hub;
 

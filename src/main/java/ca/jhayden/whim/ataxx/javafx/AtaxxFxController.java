@@ -37,8 +37,11 @@ public class AtaxxFxController implements GameHub {
 	private void initialize() {
 		createSetupButtons();
 		scoreFxPanel = new ScoreFxPanel();
+
 		scorePanel.getChildren().add(scoreFxPanel);
+
 		boardPanel = new AtaxxFxPanel(this, Tile.PIECE_1);
+
 		gamePanel.getChildren().add(boardPanel);
 		gamePanel.setVisible(false);
 	}
@@ -54,7 +57,7 @@ public class AtaxxFxController implements GameHub {
 	@Override
 	public void startNewGame(GameSetup setup) {
 		this.gameSetup = setup;
-		this.state = GameEngine.newGame(setup);
+		this.state = GameEngine.newGame(setup).endState();
 
 		scoreFxPanel.startNewGame(setup.getNumberOfPlayers().value());
 		setupPanel.setVisible(false);
@@ -66,14 +69,15 @@ public class AtaxxFxController implements GameHub {
 	private void updateGameState(AtaxxState newState) {
 		this.state = newState;
 
-		boolean gameOver = GameEngine.isGameOver(newState);
+		final boolean gameOver = GameEngine.isGameOver(newState);
+
+		boardPanel.update(newState, gameOver);
+		scoreFxPanel.update(newState, gameOver);
+
 		if (gameOver) {
 			System.out.println("GAME OVER");
 			System.out.println(computeGameOverMessage(newState));
 		}
-
-		boardPanel.update(newState, gameOver);
-		scoreFxPanel.update(newState, gameOver);
 
 		if (newState.currentPlayer().isHuman() && GameEngine.computeAllMoves(newState).isEmpty()) {
 			move(GameMove.PASS, null);
@@ -99,7 +103,7 @@ public class AtaxxFxController implements GameHub {
 	@Override
 	public void move(GameMove move, Object from) {
 		if (GameEngine.isValidMove(this.state, move)) {
-			AtaxxState newState = GameEngine.applyMove(this.state, move);
+			AtaxxState newState = GameEngine.applyMove(this.state, move).endState();
 			updateGameState(newState);
 
 			if (!GameEngine.isGameOver(newState) && !newState.currentPlayer().isHuman()) {

@@ -23,7 +23,7 @@ public class GameTreeBuilder {
 	}
 
 	public GameTreeBuilder with(GameMove move) {
-		var newState = GameEngine.applyMove(this.state, move);
+		var newState = GameEngine.applyMove(this.state, move).endState();
 		final var out = new GameTreeBuilder(newState, move);
 		this.children.add(out);
 		return out;

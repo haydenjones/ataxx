@@ -3,28 +3,31 @@ package ca.jhayden.whim.ataxx.swing;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import ca.jhayden.whim.ataxx.model.AtaxxChangeInfo;
+import ca.jhayden.whim.ataxx.model.Player;
 import ca.jhayden.whim.ataxx.model.Scores;
 import ca.jhayden.whim.ataxx.model.Tile;
 
-public class ScoreSingleJPanel extends JPanel {
+public class ScoreSingleJPanel extends JPanel implements AtaxxGui {
 
 	private static final long serialVersionUID = 2619467135809809125L;
 
 	private final JLabel label = new JLabel("");
-	private final Tile tile;
+	private final Player player;
 
-	public ScoreSingleJPanel(Tile myTile) {
+	public ScoreSingleJPanel(final Player player) {
 		super();
-
-		this.tile = myTile;
-
-		label.setForeground(AtaxxJFrame.COLOR_MAP.get(myTile));
+		this.player = player;
+		label.setForeground(player.color());
 		this.add(label);
 	}
 
-	public void update(Scores score, Tile activePlayerTile) {
-		String start = ((activePlayerTile == tile) ? "* " : "") + this.tile.getMyScore(score);
-		label.setText(start);
+	@Override
+	public void update(AtaxxChangeInfo changeInfo) {
+		final Tile activePlayerTile = changeInfo.endState().currentPlayer().tile();
+		final Scores score = changeInfo.endState().computeScores();
+		final String star = (activePlayerTile == player.tile()) ? " * " : "";
+		String start = star + player.name() + ": " + player.tile().getMyScore(score) + star;
+		label.setText(start.trim());
 	}
-
 }

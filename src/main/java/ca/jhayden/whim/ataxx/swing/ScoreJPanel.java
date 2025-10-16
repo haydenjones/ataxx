@@ -1,55 +1,43 @@
 package ca.jhayden.whim.ataxx.swing;
 
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
+import java.awt.FlowLayout;
+import java.util.EnumMap;
 
 import javax.swing.JPanel;
 
-import ca.jhayden.whim.ataxx.model.AtaxxState;
-import ca.jhayden.whim.ataxx.model.Scores;
+import ca.jhayden.whim.ataxx.model.AtaxxChangeInfo;
+import ca.jhayden.whim.ataxx.model.ChangeType;
+import ca.jhayden.whim.ataxx.model.Player;
 import ca.jhayden.whim.ataxx.model.Tile;
 
-public class ScoreJPanel extends JPanel {
+public class ScoreJPanel extends JPanel implements AtaxxGui {
 	private static final long serialVersionUID = 8710836157609000120L;
 
-	private final ScoreSingleJPanel label1 = new ScoreSingleJPanel(Tile.PIECE_1);
-	private final ScoreSingleJPanel label2 = new ScoreSingleJPanel(Tile.PIECE_2);
-	private final ScoreSingleJPanel label3 = new ScoreSingleJPanel(Tile.PIECE_3);
-	private final ScoreSingleJPanel label4 = new ScoreSingleJPanel(Tile.PIECE_4);
+	private EnumMap<Tile, ScoreSingleJPanel> map = new EnumMap<>(Tile.class);
 
 	public ScoreJPanel() {
-		super(new GridBagLayout());
+		super(new FlowLayout());
 	}
 
-	public void update(AtaxxState state, boolean gameOver) {
-		Scores score = state.computeScores();
-		label1.update(score, state.currentPlayer().tile());
-		label2.update(score, state.currentPlayer().tile());
-		label3.update(score, state.currentPlayer().tile());
-		label4.update(score, state.currentPlayer().tile());
-	}
+	@Override
+	public void update(AtaxxChangeInfo changeInfo) {
+		if (changeInfo.type() == ChangeType.START_NEW_GAME) {
+			for (ScoreSingleJPanel p : map.values()) {
+				this.remove(p);
+			}
 
-	public void startNewGame(int numberOfPlayers) {
-		final var gbc = new GridBagConstraints();
-		gbc.anchor = GridBagConstraints.CENTER;
-		gbc.fill = GridBagConstraints.BOTH;
-		gbc.gridwidth = 1;
-		gbc.gridheight = 1;
-		gbc.ipadx = 10;
-		gbc.ipady = 5;
-		gbc.weightx = 1;
-		gbc.weighty = 1;
+			map.clear();
 
-		gbc.gridx = 0;
-		this.add(label1, gbc);
-		gbc.gridx = 1;
-		this.add(label2, gbc);
+			for (Player p : changeInfo.endState().players()) {
+				ScoreSingleJPanel panel = new ScoreSingleJPanel(p);
+				this.add(panel);
+				map.put(p.tile(), panel);
+			}
+		}
 
-		if (numberOfPlayers > 2) {
-			gbc.gridx = 2;
-			this.add(label3, gbc);
-			gbc.gridx = 3;
-			this.add(label4, gbc);
+		for (Player p : changeInfo.endState().players()) {
+			ScoreSingleJPanel panel = map.get(p.tile());
+			panel.update(changeInfo);
 		}
 	}
 }

@@ -14,7 +14,9 @@ import javax.swing.SwingUtilities;
 import ca.jhayden.whim.ataxx.ai.ComputeAiMove;
 import ca.jhayden.whim.ataxx.engine.GameEngine;
 import ca.jhayden.whim.ataxx.engine.GameSetup;
+import ca.jhayden.whim.ataxx.model.AtaxxChangeInfo;
 import ca.jhayden.whim.ataxx.model.AtaxxState;
+import ca.jhayden.whim.ataxx.model.ChangeType;
 import ca.jhayden.whim.ataxx.model.GameMove;
 import ca.jhayden.whim.ataxx.model.Player;
 import ca.jhayden.whim.ataxx.model.Scores;
@@ -44,8 +46,8 @@ public class AtaxxJFrame extends JFrame implements GameHub {
 	}
 
 	private final ScoreJPanel scorePanel = new ScoreJPanel();
-	private final AtaxxSetupGame setupPanel = new AtaxxSetupGame(this);
-	private final AtaxxJPanel gamePanel = new AtaxxJPanel(this, Tile.PIECE_1);
+	private final AtaxxSetupGameJPanel setupPanel = new AtaxxSetupGameJPanel(this);
+	private final AtaxxBoardJPanel gamePanel = new AtaxxBoardJPanel(this, Tile.PIECE_1);
 
 	private GameSetup gameSetup = null;
 	private AtaxxState state = null;
@@ -62,13 +64,15 @@ public class AtaxxJFrame extends JFrame implements GameHub {
 	@Override
 	public void startNewGame(GameSetup setup) {
 		this.gameSetup = setup;
-		this.scorePanel.startNewGame(setup.getNumberOfPlayers().value());
-		this.state = GameEngine.newGame(setup);
+
+		final AtaxxChangeInfo changeInfo = GameEngine.newGame(setup);
+		this.state = changeInfo.endState();
+		this.scorePanel.update(changeInfo);
 
 		this.getContentPane().remove(setupPanel);
 		this.getContentPane().add(gamePanel, BorderLayout.CENTER);
 
-		this.updateGameState(state);
+		this.updateGameState(changeInfo);
 	}
 
 	static String computeGameOverMessage(AtaxxState state) {
@@ -102,19 +106,22 @@ public class AtaxxJFrame extends JFrame implements GameHub {
 		return "Winners are " + bestPlayers;
 	}
 
-	void updateGameState(AtaxxState newState) {
+	void updateGameState(AtaxxChangeInfo changeInfo) {
+		final AtaxxState newState = changeInfo.endState();
 		this.state = newState;
 
-		boolean gameOver = GameEngine.isGameOver(newState);
-		if (gameOver) {
-			String message = AtaxxJFrame.computeGameOverMessage(newState);
+		if (changeInfo.type() == ChangeType.START_NEW_GAME) {
+			this.pack();
+		}
+		else if (changeInfo.type() == ChangeType.GAME_OVER) {
 			System.out.println("G A M E _ O V E R");
+			String message = AtaxxJFrame.computeGameOverMessage(newState);
 			System.out.println(message);
 		}
 
-		gamePanel.update(newState, gameOver);
-		scorePanel.update(newState, gameOver);
-		this.pack();
+		gamePanel.update(changeInfo);
+		scorePanel.update(changeInfo);
+
 		this.repaint();
 
 		// If the player is human and they don't have a move, then PASS.
@@ -130,10 +137,11 @@ public class AtaxxJFrame extends JFrame implements GameHub {
 	public void move(final GameMove move, Object from) {
 		boolean allow = GameEngine.isValidMove(this.state, move);
 		if (allow) {
-			AtaxxState newState = GameEngine.applyMove(this.state, move);
-			this.updateGameState(newState);
+			AtaxxChangeInfo changeInfo = GameEngine.applyMove(this.state, move);
+			this.updateGameState(changeInfo);
 
-			if (!GameEngine.isGameOver(newState)) {
+			if (changeInfo.type() == ChangeType.GAME_MOVE) {
+				final AtaxxState newState = changeInfo.endState();
 				if (!newState.currentPlayer().isHuman()) {
 					PerformAiMoveTask task = new PerformAiMoveTask(this, newState, this.gameSetup.getAiType().value());
 					Thread t = new Thread(task);

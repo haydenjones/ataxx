@@ -2,6 +2,7 @@ package ca.jhayden.whim.ataxx.ai;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.awt.Color;
 import java.util.Arrays;
 import java.util.List;
 
@@ -14,7 +15,8 @@ import ca.jhayden.whim.ataxx.model.Player;
 import ca.jhayden.whim.ataxx.model.Tile;
 
 public class ComputeAiMove2_Test {
-	final List<Player> players = Arrays.asList(new Player(Tile.PIECE_1, true), new Player(Tile.PIECE_2, false));
+	final List<Player> players = Arrays.asList(new Player(Tile.PIECE_1, true, Color.RED, "Red"),
+			new Player(Tile.PIECE_2, false, Color.BLUE, "Blue"));
 
 	@Test
 	public void worksDepth2() {
