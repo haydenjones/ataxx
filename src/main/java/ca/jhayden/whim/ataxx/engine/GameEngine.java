@@ -10,6 +10,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import ca.jhayden.whim.ataxx.engine.GameSetup.NumberOfPlayers;
+import ca.jhayden.whim.ataxx.model.AnimateInfo;
 import ca.jhayden.whim.ataxx.model.AtaxxBoard;
 import ca.jhayden.whim.ataxx.model.AtaxxChangeInfo;
 import ca.jhayden.whim.ataxx.model.AtaxxRow;
@@ -157,7 +158,7 @@ public class GameEngine {
 		return out;
 	}
 
-	public static AtaxxChangeInfo applyMove(AtaxxState state, GameMove move) {
+	public static AtaxxChangeInfo applyMove(AtaxxState state, GameMove move, List<AnimateInfo> animationsDone) {
 		// Advance the player
 		int index = state.players().indexOf(state.currentPlayer());
 		int nextPlayerIndex = (index + 1) % state.players().size();

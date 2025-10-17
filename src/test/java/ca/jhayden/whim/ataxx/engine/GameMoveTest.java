@@ -15,7 +15,7 @@ public class GameMoveTest {
 	public void works() {
 		AtaxxState state = GameEngine.newGame(GameSetupType.TWO_PLAYER_SIMPLE).endState();
 		GameMove move = new GameMove(Tile.PIECE_1, new Pos(0, 0), MoveType.DR);
-		state = GameEngine.applyMove(state, move).endState();
+		state = GameEngine.applyMove(state, move, null).endState();
 		assertNotNull(state);
 	}
 }

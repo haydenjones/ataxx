@@ -1,11 +1,13 @@
 package ca.jhayden.whim.ataxx.javafx;
 
+import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
 import ca.jhayden.whim.ataxx.ai.ComputeAiMove;
 import ca.jhayden.whim.ataxx.engine.GameEngine;
 import ca.jhayden.whim.ataxx.engine.GameSetup;
 import ca.jhayden.whim.ataxx.engine.GameSetupType;
+import ca.jhayden.whim.ataxx.model.AnimateInfo;
 import ca.jhayden.whim.ataxx.model.AtaxxState;
 import ca.jhayden.whim.ataxx.model.GameMove;
 import ca.jhayden.whim.ataxx.model.Player;
@@ -103,7 +105,8 @@ public class AtaxxFxController implements GameHub {
 	@Override
 	public void move(GameMove move, Object from) {
 		if (GameEngine.isValidMove(this.state, move)) {
-			AtaxxState newState = GameEngine.applyMove(this.state, move).endState();
+			final var animations = new ArrayList<AnimateInfo>();
+			AtaxxState newState = GameEngine.applyMove(this.state, move, animations).endState();
 			updateGameState(newState);
 
 			if (!GameEngine.isGameOver(newState) && !newState.currentPlayer().isHuman()) {

@@ -14,6 +14,7 @@ import javax.swing.SwingUtilities;
 import ca.jhayden.whim.ataxx.ai.ComputeAiMove;
 import ca.jhayden.whim.ataxx.engine.GameEngine;
 import ca.jhayden.whim.ataxx.engine.GameSetup;
+import ca.jhayden.whim.ataxx.model.AnimateInfo;
 import ca.jhayden.whim.ataxx.model.AtaxxChangeInfo;
 import ca.jhayden.whim.ataxx.model.AtaxxState;
 import ca.jhayden.whim.ataxx.model.ChangeType;
@@ -32,17 +33,17 @@ public class AtaxxJFrame extends JFrame implements GameHub {
 		COLOR_MAP.put(Tile.EMPTY, Color.WHITE);
 		COLOR_MAP.put(Tile.WALL, Color.BLACK);
 
-		COLOR_MAP.put(Tile.PIECE_1, Color.RED);
-		COLOR_NAME.put(Tile.PIECE_1, "RED");
+		COLOR_MAP.put(Tile.PIECE_1, Color.WHITE);
+		COLOR_NAME.put(Tile.PIECE_1, "");
 
-		COLOR_MAP.put(Tile.PIECE_2, Color.BLUE);
-		COLOR_NAME.put(Tile.PIECE_2, "BLUE");
+		COLOR_MAP.put(Tile.PIECE_2, Color.WHITE);
+		COLOR_NAME.put(Tile.PIECE_2, "");
 
-		COLOR_MAP.put(Tile.PIECE_3, Color.MAGENTA);
-		COLOR_NAME.put(Tile.PIECE_3, "MAGENTA");
+		COLOR_MAP.put(Tile.PIECE_3, Color.WHITE);
+		COLOR_NAME.put(Tile.PIECE_3, "");
 
-		COLOR_MAP.put(Tile.PIECE_4, Color.ORANGE);
-		COLOR_NAME.put(Tile.PIECE_4, "ORANGE");
+		COLOR_MAP.put(Tile.PIECE_4, Color.WHITE);
+		COLOR_NAME.put(Tile.PIECE_4, "");
 	}
 
 	private final ScoreJPanel scorePanel = new ScoreJPanel();
@@ -64,8 +65,13 @@ public class AtaxxJFrame extends JFrame implements GameHub {
 	@Override
 	public void startNewGame(GameSetup setup) {
 		this.gameSetup = setup;
-
 		final AtaxxChangeInfo changeInfo = GameEngine.newGame(setup);
+
+		for (Player p : changeInfo.endState().players()) {
+			COLOR_MAP.put(p.tile(), p.color());
+			COLOR_NAME.put(p.tile(), p.name());
+		}
+
 		this.state = changeInfo.endState();
 		this.scorePanel.update(changeInfo);
 
@@ -137,7 +143,8 @@ public class AtaxxJFrame extends JFrame implements GameHub {
 	public void move(final GameMove move, Object from) {
 		boolean allow = GameEngine.isValidMove(this.state, move);
 		if (allow) {
-			AtaxxChangeInfo changeInfo = GameEngine.applyMove(this.state, move);
+			final var animations = new ArrayList<AnimateInfo>();
+			AtaxxChangeInfo changeInfo = GameEngine.applyMove(this.state, move, animations);
 			this.updateGameState(changeInfo);
 
 			if (changeInfo.type() == ChangeType.GAME_MOVE) {

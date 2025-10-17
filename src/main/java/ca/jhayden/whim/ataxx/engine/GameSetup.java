@@ -1,6 +1,8 @@
 package ca.jhayden.whim.ataxx.engine;
 
-public interface GameSetup {
+import java.io.Serializable;
+
+public interface GameSetup extends Serializable {
 	public enum NumberOfPlayers {
 		TWO(2), //
 		FOUR(4);
