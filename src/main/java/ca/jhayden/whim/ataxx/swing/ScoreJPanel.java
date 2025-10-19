@@ -2,9 +2,11 @@ package ca.jhayden.whim.ataxx.swing;
 
 import java.awt.FlowLayout;
 import java.util.EnumMap;
+import java.util.List;
 
 import javax.swing.JPanel;
 
+import ca.jhayden.whim.ataxx.model.AnimateInfo;
 import ca.jhayden.whim.ataxx.model.AtaxxChangeInfo;
 import ca.jhayden.whim.ataxx.model.ChangeType;
 import ca.jhayden.whim.ataxx.model.Player;
@@ -20,7 +22,7 @@ public class ScoreJPanel extends JPanel implements AtaxxGui {
 	}
 
 	@Override
-	public void update(AtaxxChangeInfo changeInfo) {
+	public void update(AtaxxChangeInfo changeInfo, List<AnimateInfo> animations) {
 		if (changeInfo.type() == ChangeType.START_NEW_GAME) {
 			for (ScoreSingleJPanel p : map.values()) {
 				this.remove(p);
@@ -37,7 +39,7 @@ public class ScoreJPanel extends JPanel implements AtaxxGui {
 
 		for (Player p : changeInfo.endState().players()) {
 			ScoreSingleJPanel panel = map.get(p.tile());
-			panel.update(changeInfo);
+			panel.update(changeInfo, AnimateInfo.EMPTY_LIST);
 		}
 	}
 }

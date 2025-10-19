@@ -24,7 +24,7 @@ import ca.jhayden.whim.ataxx.model.Scores;
 import ca.jhayden.whim.ataxx.model.Tile;
 import ca.jhayden.whim.ataxx.ui.GameHub;
 
-public class AtaxxJFrame extends JFrame implements GameHub {
+public class AtaxxJFrame extends JFrame implements GameHub, AtaxxGui {
 	private static final long serialVersionUID = 5990472863772348300L;
 
 	static final EnumMap<Tile, Color> COLOR_MAP = new EnumMap<>(Tile.class);
@@ -73,12 +73,11 @@ public class AtaxxJFrame extends JFrame implements GameHub {
 		}
 
 		this.state = changeInfo.endState();
-		this.scorePanel.update(changeInfo);
 
 		this.getContentPane().remove(setupPanel);
 		this.getContentPane().add(gamePanel, BorderLayout.CENTER);
 
-		this.updateGameState(changeInfo);
+		this.update(changeInfo, AnimateInfo.EMPTY_LIST);
 	}
 
 	static String computeGameOverMessage(AtaxxState state) {
@@ -112,7 +111,8 @@ public class AtaxxJFrame extends JFrame implements GameHub {
 		return "Winners are " + bestPlayers;
 	}
 
-	void updateGameState(AtaxxChangeInfo changeInfo) {
+	@Override
+	public void update(AtaxxChangeInfo changeInfo, List<AnimateInfo> animations) {
 		final AtaxxState newState = changeInfo.endState();
 		this.state = newState;
 
@@ -125,8 +125,8 @@ public class AtaxxJFrame extends JFrame implements GameHub {
 			System.out.println(message);
 		}
 
-		gamePanel.update(changeInfo);
-		scorePanel.update(changeInfo);
+		gamePanel.update(changeInfo, animations);
+		scorePanel.update(changeInfo, animations);
 
 		this.repaint();
 
@@ -145,7 +145,7 @@ public class AtaxxJFrame extends JFrame implements GameHub {
 		if (allow) {
 			final var animations = new ArrayList<AnimateInfo>();
 			AtaxxChangeInfo changeInfo = GameEngine.applyMove(this.state, move, animations);
-			this.updateGameState(changeInfo);
+			this.update(changeInfo, animations);
 
 			if (changeInfo.type() == ChangeType.GAME_MOVE) {
 				final AtaxxState newState = changeInfo.endState();

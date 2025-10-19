@@ -3,6 +3,7 @@ package ca.jhayden.whim.ataxx.model;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 public record AtaxxBoard(List<AtaxxRow> rows) {
 	public static final AtaxxBoard EMPTY_BOARD = new AtaxxBoard(AtaxxRow.EMPTY_LIST);
@@ -14,6 +15,22 @@ public record AtaxxBoard(List<AtaxxRow> rows) {
 
 	public AtaxxBoard(List<AtaxxRow> rows) {
 		this.rows = Collections.unmodifiableList(new ArrayList<>(rows));
+	}
+
+	public AtaxxBoard with(Map<Pos, Tile> changedTiles) {
+		if (changedTiles.isEmpty()) {
+			return this;
+		}
+
+		final var newRows = new ArrayList<AtaxxRow>();
+
+		int rowIndex = 0;
+		for (AtaxxRow row : rows) {
+			newRows.add(row.with(changedTiles, rowIndex));
+			rowIndex++;
+		}
+
+		return new AtaxxBoard(newRows);
 	}
 
 	public Tile at(Pos start) {

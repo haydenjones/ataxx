@@ -1,12 +1,10 @@
 package ca.jhayden.whim.ataxx.engine;
 
 import java.awt.Color;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.SortedSet;
-import java.util.TreeMap;
 import java.util.TreeSet;
 
 import ca.jhayden.whim.ataxx.engine.GameSetup.NumberOfPlayers;
@@ -158,51 +156,13 @@ public class GameEngine {
 		return out;
 	}
 
-	public static AtaxxChangeInfo applyMove(AtaxxState state, GameMove move, List<AnimateInfo> animationsDone) {
-		// Advance the player
-		int index = state.players().indexOf(state.currentPlayer());
-		int nextPlayerIndex = (index + 1) % state.players().size();
-		final Player nextPlayer = state.players().get(nextPlayerIndex);
+	static AnimateInfo computeFlipAnimateInfo() {
+		return null;
+	}
 
-		// Check that the move is valid
-		if (!isValidMove(state, move)) {
-			throw new IllegalArgumentException(move + " NOT allowed.");
-		}
-
-		AtaxxBoard board = state.board();
-
-		// Update the Board
-		if (move != GameMove.PASS) {
-			final TreeMap<Pos, Tile> changedTiles = new TreeMap<>();
-			if (move.move().isJump()) {
-				changedTiles.put(move.start(), Tile.EMPTY);
-			}
-			final Tile playerTile = state.currentPlayer().tile();
-			final Pos endPos = move.start().translate(move.move());
-			changedTiles.put(endPos, playerTile);
-
-			for (MoveType mt : MoveType.values()) {
-				if (!mt.isJump()) {
-					Pos pos = endPos.translate(mt);
-					Tile tile = state.board().at(pos);
-					if ((tile != playerTile) && (tile.isPiece())) {
-						changedTiles.put(pos, playerTile);
-					}
-				}
-			}
-
-			// Now we Update the board
-			List<AtaxxRow> newRows = new ArrayList<>();
-			for (AtaxxRow row : state.board().rows()) {
-				row = row.with(changedTiles, newRows.size());
-				newRows.add(row);
-			}
-
-			board = new AtaxxBoard(newRows);
-		}
-
-		var newState = new AtaxxState(state.players(), board, nextPlayer);
-		var changeType = GameEngine.isGameOver(newState) ? ChangeType.GAME_OVER : ChangeType.GAME_MOVE;
-		return new AtaxxChangeInfo(changeType, newState);
+	public static AtaxxChangeInfo applyMove(final AtaxxState state, final GameMove move,
+			final List<AnimateInfo> animationsDone) {
+		ApplyMoveTask task = new ApplyMoveTask(state, move, animationsDone);
+		return task.call();
 	}
 }

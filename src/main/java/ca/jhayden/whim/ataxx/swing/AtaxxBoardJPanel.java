@@ -7,9 +7,11 @@ import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.util.List;
 
 import javax.swing.JPanel;
 
+import ca.jhayden.whim.ataxx.model.AnimateInfo;
 import ca.jhayden.whim.ataxx.model.AtaxxChangeInfo;
 import ca.jhayden.whim.ataxx.model.AtaxxRow;
 import ca.jhayden.whim.ataxx.model.AtaxxState;
@@ -152,7 +154,10 @@ public class AtaxxBoardJPanel extends JPanel implements AtaxxGui, MouseMotionLis
 	}
 
 	@Override
-	public void update(AtaxxChangeInfo changeInfo) {
+	public void update(AtaxxChangeInfo changeInfo, List<AnimateInfo> animations) {
+		for (AnimateInfo ai : animations) {
+			System.out.println(ai);
+		}
 		this.state = changeInfo.endState();
 		this.repaint();
 	}
