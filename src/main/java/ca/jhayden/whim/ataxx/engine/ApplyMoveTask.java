@@ -55,6 +55,9 @@ public record ApplyMoveTask(AtaxxState state, GameMove move, List<AnimateInfo> a
 		if (animationsDone == null) {
 			return;
 		}
+		else if (positions.isEmpty()) {
+			return;
+		}
 		AnimateInfo ai = new AnimateInfo(base, type, positions);
 		animationsDone.add(ai);
 	}
