@@ -16,10 +16,12 @@ import javax.swing.JPanel;
 import javax.swing.Timer;
 
 import ca.jhayden.whim.ataxx.model.AnimateInfo;
+import ca.jhayden.whim.ataxx.model.AnimateInfoType;
 import ca.jhayden.whim.ataxx.model.AtaxxBoard;
 import ca.jhayden.whim.ataxx.model.AtaxxChangeInfo;
 import ca.jhayden.whim.ataxx.model.AtaxxRow;
 import ca.jhayden.whim.ataxx.model.AtaxxState;
+import ca.jhayden.whim.ataxx.model.FromToPos;
 import ca.jhayden.whim.ataxx.model.GameMove;
 import ca.jhayden.whim.ataxx.model.Pos;
 import ca.jhayden.whim.ataxx.model.Tile;
@@ -51,7 +53,7 @@ public class AtaxxBoardJPanel extends JPanel implements AtaxxGui, MouseMotionLis
 		gameHub = hub;
 		playerTile = myPlayerTile;
 
-		timer = new Timer(125, new AnimateTask(this));
+		timer = new Timer(75, new AnimateTask(this));
 		timer.start();
 
 		this.addMouseListener(this);
@@ -78,6 +80,23 @@ public class AtaxxBoardJPanel extends JPanel implements AtaxxGui, MouseMotionLis
 				SQUARE_LENGTH * pos.col() + SQUARE_GAP + SQUARE_GAP, //
 				SQUARE_LENGTH * pos.row() + SQUARE_GAP + SQUARE_GAP, //
 				SQUARE_LENGTH - SQUARE_GAP - SQUARE_GAP - SQUARE_GAP - SQUARE_GAP, //
+				SQUARE_LENGTH - SQUARE_GAP - SQUARE_GAP - SQUARE_GAP - SQUARE_GAP);
+	}
+
+	void fillOval(Graphics2D g2d, FromToPos pos, Color c, float ptg) {
+		g2d.setColor(c);
+
+		float x0 = SQUARE_LENGTH * pos.from().col() + SQUARE_GAP + SQUARE_GAP;
+		float y0 = SQUARE_LENGTH * pos.from().row() + SQUARE_GAP + SQUARE_GAP;
+
+		float x1 = SQUARE_LENGTH * pos.to().col() + SQUARE_GAP + SQUARE_GAP;
+		float y1 = SQUARE_LENGTH * pos.to().row() + SQUARE_GAP + SQUARE_GAP;
+
+		int x = (int) (x0 + (ptg * (x1 - x0)));
+		int y = (int) (y0 + (ptg * (y1 - y0)));
+
+		g2d.fillOval( //
+				x, y, SQUARE_LENGTH - SQUARE_GAP - SQUARE_GAP - SQUARE_GAP - SQUARE_GAP, //
 				SQUARE_LENGTH - SQUARE_GAP - SQUARE_GAP - SQUARE_GAP - SQUARE_GAP);
 	}
 
@@ -124,7 +143,8 @@ public class AtaxxBoardJPanel extends JPanel implements AtaxxGui, MouseMotionLis
 	}
 
 	void paint2(Graphics2D g2d) {
-		if (this.currentAnimation == null) {
+		final AnimateInfo ca = this.currentAnimation;
+		if (ca == null) {
 			return;
 		}
 
@@ -134,7 +154,12 @@ public class AtaxxBoardJPanel extends JPanel implements AtaxxGui, MouseMotionLis
 		}
 
 		float delta = (float) (stm - animationStart) / (animationEnd - animationStart);
-		System.out.println(delta);
+		delta = Math.min(delta, 1f);
+
+		if ((ca.type() == AnimateInfoType.GROW) || (ca.type() == AnimateInfoType.JUMP)) {
+			FromToPos ftp = ca.positions().getFirst();
+			this.fillOval(g2d, ftp, AtaxxJFrame.COLOR_MAP.get(ca.tile()), delta);
+		}
 	}
 
 	@Override

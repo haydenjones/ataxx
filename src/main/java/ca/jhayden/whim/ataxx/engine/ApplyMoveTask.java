@@ -44,21 +44,21 @@ public record ApplyMoveTask(AtaxxState state, GameMove move, List<AnimateInfo> a
 		return new AtaxxChangeInfo(changeType, newState);
 	}
 
-	void addAnimation(AnimateInfoType type, AtaxxBoard base, FromToPos positions) {
+	void addAnimation(AnimateInfoType type, AtaxxBoard base, Tile tile, FromToPos positions) {
 		if (animationsDone == null) {
 			return;
 		}
-		addAnimation(type, base, List.of(positions));
+		addAnimation(type, base, tile, List.of(positions));
 	}
 
-	void addAnimation(AnimateInfoType type, AtaxxBoard base, List<FromToPos> positions) {
+	void addAnimation(AnimateInfoType type, AtaxxBoard base, Tile tile, List<FromToPos> positions) {
 		if (animationsDone == null) {
 			return;
 		}
 		else if (positions.isEmpty()) {
 			return;
 		}
-		AnimateInfo ai = new AnimateInfo(base, type, positions);
+		AnimateInfo ai = new AnimateInfo(base, type, tile, positions);
 		animationsDone.add(ai);
 	}
 
@@ -69,10 +69,10 @@ public record ApplyMoveTask(AtaxxState state, GameMove move, List<AnimateInfo> a
 			changedTiles.put(move.start(), Tile.EMPTY);
 			AtaxxBoard base = this.state().board().with(changedTiles);
 
-			addAnimation(AnimateInfoType.JUMP, base, new FromToPos(move.start(), endPos));
+			addAnimation(AnimateInfoType.JUMP, base, move.tile(), new FromToPos(move.start(), endPos));
 		}
 		else {
-			addAnimation(AnimateInfoType.GROW, state.board(), new FromToPos(move.start(), endPos));
+			addAnimation(AnimateInfoType.GROW, state.board(), move.tile(), new FromToPos(move.start(), endPos));
 		}
 
 		changedTiles.put(endPos, move.tile());
@@ -97,7 +97,7 @@ public record ApplyMoveTask(AtaxxState state, GameMove move, List<AnimateInfo> a
 			}
 		}
 
-		addAnimation(AnimateInfoType.FLIP, board, positions);
+		addAnimation(AnimateInfoType.FLIP, board, this.move.tile(), positions);
 		return board.with(changedTiles);
 	}
 }
