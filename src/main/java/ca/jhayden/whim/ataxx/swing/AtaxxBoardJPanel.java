@@ -1,6 +1,5 @@
 package ca.jhayden.whim.ataxx.swing;
 
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -16,30 +15,25 @@ import javax.swing.JPanel;
 import javax.swing.Timer;
 
 import ca.jhayden.whim.ataxx.model.AnimateInfo;
-import ca.jhayden.whim.ataxx.model.AnimateInfoType;
 import ca.jhayden.whim.ataxx.model.AtaxxBoard;
 import ca.jhayden.whim.ataxx.model.AtaxxChangeInfo;
-import ca.jhayden.whim.ataxx.model.AtaxxRow;
 import ca.jhayden.whim.ataxx.model.AtaxxState;
-import ca.jhayden.whim.ataxx.model.FromToPos;
 import ca.jhayden.whim.ataxx.model.GameMove;
 import ca.jhayden.whim.ataxx.model.Pos;
 import ca.jhayden.whim.ataxx.model.Tile;
 import ca.jhayden.whim.ataxx.ui.GameHub;
 
 public class AtaxxBoardJPanel extends JPanel implements AtaxxGui, MouseMotionListener, MouseListener {
-	private static final int SQUARE_LENGTH = 60;
-	private static final int SQUARE_GAP = 4;
+	static final int SQUARE_LENGTH = 60;
+	static final int SQUARE_GAP = 4;
 
 	private static final long serialVersionUID = -6758845382471013594L;
+	private final DrawOnBoard drawTool = new DrawOnBoard(this);
 	private final GameHub gameHub;
 	private final Tile playerTile;
 	private final Timer timer;
 
 	AtaxxBoard board = AtaxxState.NULL.board();
-
-	private Pos startPos = null;
-	private Pos cursorPos = null;
 
 	Vector<AnimateInfo> animations = new Vector<>();
 	volatile AtaxxChangeInfo afterAnimations = null;
@@ -47,6 +41,9 @@ public class AtaxxBoardJPanel extends JPanel implements AtaxxGui, MouseMotionLis
 	volatile AnimateInfo currentAnimation = null;
 	volatile long animationStart = 0;
 	volatile long animationEnd = 0;
+
+	private Pos startPos = null;
+	private Pos cursorPos = null;
 
 	public AtaxxBoardJPanel(GameHub hub, Tile myPlayerTile) {
 		super();
@@ -61,104 +58,25 @@ public class AtaxxBoardJPanel extends JPanel implements AtaxxGui, MouseMotionLis
 		this.setPreferredSize(new Dimension(SQUARE_LENGTH * 8, SQUARE_LENGTH * 8));
 	}
 
-	void fillRect(Graphics2D g2d, Pos pos, Color c) {
-		g2d.setColor(c);
-		g2d.fillRect(SQUARE_LENGTH * pos.col() + SQUARE_GAP, SQUARE_LENGTH * pos.row() + SQUARE_GAP,
-				SQUARE_LENGTH - SQUARE_GAP - SQUARE_GAP, SQUARE_LENGTH - SQUARE_GAP - SQUARE_GAP);
-	}
-
-	void drawRect(Graphics2D g2d, Pos pos, Color c) {
-		g2d.setColor(c);
-		g2d.drawRect(SQUARE_LENGTH * pos.col(), SQUARE_LENGTH * pos.row(), SQUARE_LENGTH, SQUARE_LENGTH);
-		g2d.drawRect(SQUARE_LENGTH * pos.col() + 1, SQUARE_LENGTH * pos.row() + 1, SQUARE_LENGTH - 2,
-				SQUARE_LENGTH - 2);
-	}
-
-	void fillOval(Graphics2D g2d, Pos pos, Color c) {
-		g2d.setColor(c);
-		g2d.fillOval( //
-				SQUARE_LENGTH * pos.col() + SQUARE_GAP + SQUARE_GAP, //
-				SQUARE_LENGTH * pos.row() + SQUARE_GAP + SQUARE_GAP, //
-				SQUARE_LENGTH - SQUARE_GAP - SQUARE_GAP - SQUARE_GAP - SQUARE_GAP, //
-				SQUARE_LENGTH - SQUARE_GAP - SQUARE_GAP - SQUARE_GAP - SQUARE_GAP);
-	}
-
-	void fillOval(Graphics2D g2d, FromToPos pos, Color c, float ptg) {
-		g2d.setColor(c);
-
-		float x0 = SQUARE_LENGTH * pos.from().col() + SQUARE_GAP + SQUARE_GAP;
-		float y0 = SQUARE_LENGTH * pos.from().row() + SQUARE_GAP + SQUARE_GAP;
-
-		float x1 = SQUARE_LENGTH * pos.to().col() + SQUARE_GAP + SQUARE_GAP;
-		float y1 = SQUARE_LENGTH * pos.to().row() + SQUARE_GAP + SQUARE_GAP;
-
-		int x = (int) (x0 + (ptg * (x1 - x0)));
-		int y = (int) (y0 + (ptg * (y1 - y0)));
-
-		g2d.fillOval( //
-				x, y, SQUARE_LENGTH - SQUARE_GAP - SQUARE_GAP - SQUARE_GAP - SQUARE_GAP, //
-				SQUARE_LENGTH - SQUARE_GAP - SQUARE_GAP - SQUARE_GAP - SQUARE_GAP);
-	}
-
 	@Override
 	public void paint(Graphics g) {
 		if (g instanceof Graphics2D g2d) {
-			int rowPos = 0;
-			for (AtaxxRow row : board.rows()) {
+			this.drawTool.paint(g2d, this.board, this.startPos, this.cursorPos);
 
-				int colPos = 0;
-				for (Tile tile : row) {
-					g2d.setColor(Color.GRAY);
-					g2d.fillRect(SQUARE_LENGTH * colPos, SQUARE_LENGTH * rowPos, SQUARE_LENGTH, SQUARE_LENGTH);
-
-					Pos pos = new Pos(rowPos, colPos);
-					if (pos.equals(this.startPos)) {
-						this.drawRect(g2d, pos, Color.GREEN);
-					}
-					else if (pos.equals(this.cursorPos)) {
-						this.drawRect(g2d, pos, Color.CYAN);
-					}
-
-					if (tile == Tile.WALL) {
-						fillRect(g2d, pos, Color.BLACK);
-					}
-					else {
-						fillRect(g2d, pos, Color.WHITE);
-
-						if (tile != null) {
-							if (tile.isPiece()) {
-								this.fillOval(g2d, pos, AtaxxJFrame.COLOR_MAP.get(tile));
-							}
-						}
-					}
-
-					colPos++;
-				}
-
-				rowPos++;
+			final AnimateInfo ca = this.currentAnimation;
+			if (ca == null) {
+				return;
 			}
 
-			paint2(g2d);
-		}
-	}
+			final long stm = System.currentTimeMillis();
+			if (stm > this.animationEnd) {
+				this.currentAnimation = null;
+			}
 
-	void paint2(Graphics2D g2d) {
-		final AnimateInfo ca = this.currentAnimation;
-		if (ca == null) {
-			return;
-		}
+			float delta = (float) (stm - animationStart) / (animationEnd - animationStart);
+			delta = Math.min(delta, 1f);
 
-		final long stm = System.currentTimeMillis();
-		if (stm > this.animationEnd) {
-			this.currentAnimation = null;
-		}
-
-		float delta = (float) (stm - animationStart) / (animationEnd - animationStart);
-		delta = Math.min(delta, 1f);
-
-		if ((ca.type() == AnimateInfoType.GROW) || (ca.type() == AnimateInfoType.JUMP)) {
-			FromToPos ftp = ca.positions().getFirst();
-			this.fillOval(g2d, ftp, AtaxxJFrame.COLOR_MAP.get(ca.tile()), delta);
+			this.drawTool.paint(g2d, delta, ca);
 		}
 	}
 
@@ -218,7 +136,6 @@ public class AtaxxBoardJPanel extends JPanel implements AtaxxGui, MouseMotionLis
 	}
 
 	void setUpAnimation(AnimateInfo ai) {
-		System.out.println(ai.type());
 		this.board = ai.base();
 		this.currentAnimation = ai;
 		this.animationStart = System.currentTimeMillis();
