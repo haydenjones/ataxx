@@ -104,9 +104,6 @@ public class DrawOnBoard {
 				else if (pos.equals(cursorPos)) {
 					c = Color.CYAN;
 				}
-				else if (tile == Tile.WALL) {
-					c = Color.BLACK;
-				}
 
 				Rect r = this.computeTileFull(pos);
 				fillRect(g2d, r, c);
@@ -114,6 +111,9 @@ public class DrawOnBoard {
 				r = this.computeTileInner(pos);
 				if (tile != Tile.WALL) {
 					fillRect(g2d, r, Color.WHITE);
+				}
+				else {
+					fillRect(g2d, r, Color.BLACK);
 				}
 
 				if (tile.isPiece()) {
