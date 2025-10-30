@@ -1,17 +1,15 @@
 package ca.jhayden.whim.ataxx.swing;
 
-import java.util.List;
-
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import ca.jhayden.whim.ataxx.model.AnimateInfo;
 import ca.jhayden.whim.ataxx.model.AtaxxChangeInfo;
 import ca.jhayden.whim.ataxx.model.Player;
 import ca.jhayden.whim.ataxx.model.Scores;
 import ca.jhayden.whim.ataxx.model.Tile;
+import ca.jhayden.whim.ataxx.ui.DoAfterAnimation;
 
-public class ScoreSingleJPanel extends JPanel implements AtaxxGui {
+public class ScoreSingleJPanel extends JPanel implements DoAfterAnimation {
 
 	private static final long serialVersionUID = 2619467135809809125L;
 
@@ -26,7 +24,7 @@ public class ScoreSingleJPanel extends JPanel implements AtaxxGui {
 	}
 
 	@Override
-	public void update(AtaxxChangeInfo changeInfo, List<AnimateInfo> animations) {
+	public void doAfterAnimations(AtaxxChangeInfo changeInfo) {
 		final Tile activePlayerTile = changeInfo.endState().currentPlayer().tile();
 		final Scores score = changeInfo.endState().computeScores();
 		final String star = (activePlayerTile == player.tile()) ? " * " : "";

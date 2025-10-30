@@ -21,9 +21,10 @@ import ca.jhayden.whim.ataxx.model.AtaxxState;
 import ca.jhayden.whim.ataxx.model.GameMove;
 import ca.jhayden.whim.ataxx.model.Pos;
 import ca.jhayden.whim.ataxx.model.Tile;
+import ca.jhayden.whim.ataxx.ui.DoAnimation;
 import ca.jhayden.whim.ataxx.ui.GameHub;
 
-public class AtaxxBoardJPanel extends JPanel implements AtaxxGui, MouseMotionListener, MouseListener {
+public class AtaxxBoardJPanel extends JPanel implements DoAnimation, AtaxxGui, MouseMotionListener, MouseListener {
 	static final int SQUARE_LENGTH = 60;
 	static final int SQUARE_GAP = 4;
 
@@ -140,6 +141,12 @@ public class AtaxxBoardJPanel extends JPanel implements AtaxxGui, MouseMotionLis
 		this.currentAnimation = ai;
 		this.animationStart = System.currentTimeMillis();
 		this.animationEnd = 1000L + this.animationStart;
+	}
+
+	@Override
+	public void doAnimation(AnimateInfo info) {
+		// TODO Auto-generated method stub
+
 	}
 }
 

@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.SortedSet;
+import java.util.Vector;
 import java.util.concurrent.TimeUnit;
 
 import javax.swing.JFrame;
@@ -52,6 +53,9 @@ public class AtaxxJFrame extends JFrame implements GameHub, AtaxxGui {
 
 	private GameSetup gameSetup = null;
 	private AtaxxState state = null;
+
+	private Vector<AnimateInfo> animations = new Vector<>();
+	private volatile AtaxxChangeInfo afterAnimations = null;
 
 	public AtaxxJFrame() {
 		super();
@@ -113,6 +117,9 @@ public class AtaxxJFrame extends JFrame implements GameHub, AtaxxGui {
 
 	@Override
 	public void update(AtaxxChangeInfo changeInfo, List<AnimateInfo> animations) {
+		this.animations.addAll(animations);
+		this.afterAnimations = changeInfo;
+
 		final AtaxxState newState = changeInfo.endState();
 		this.state = newState;
 
@@ -156,6 +163,17 @@ public class AtaxxJFrame extends JFrame implements GameHub, AtaxxGui {
 				}
 			}
 		}
+	}
+
+	/**
+	 * We just completed the animation given, we should ask my kids to do the next
+	 * animation.
+	 * Once we are out of animations we should update with the afterAnimations
+	 * state.
+	 */
+	@Override
+	public void animationIsDone(AnimateInfo info) {
+
 	}
 }
 
