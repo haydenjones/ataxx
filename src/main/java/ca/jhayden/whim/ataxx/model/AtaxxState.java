@@ -10,10 +10,6 @@ public record AtaxxState(List<Player> players, AtaxxBoard board, Player currentP
 	}
 
 	public Scores computeScores() {
-		Scores s = new Scores(0, 0, 0, 0);
-		for (AtaxxRow row : board.rows()) {
-			s = s.with(row.getScore());
-		}
-		return s;
+		return board.computeScores();
 	}
 }

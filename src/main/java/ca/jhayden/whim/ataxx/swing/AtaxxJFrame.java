@@ -117,6 +117,11 @@ public class AtaxxJFrame extends JFrame implements GameHub, AtaxxGui {
 
 	@Override
 	public void update(AtaxxChangeInfo changeInfo, List<AnimateInfo> animations) {
+		System.out.println("");
+		System.out.println("update:");
+		System.out.println(changeInfo);
+		System.out.println(animations);
+
 		this.animations.addAll(animations);
 		this.afterAnimations = changeInfo;
 
@@ -132,8 +137,7 @@ public class AtaxxJFrame extends JFrame implements GameHub, AtaxxGui {
 			System.out.println(message);
 		}
 
-		gamePanel.update(changeInfo, animations);
-		scorePanel.update(changeInfo, animations);
+		this.animationIsDone(null);
 
 		this.repaint();
 
@@ -173,7 +177,26 @@ public class AtaxxJFrame extends JFrame implements GameHub, AtaxxGui {
 	 */
 	@Override
 	public void animationIsDone(AnimateInfo info) {
+		System.out.println("");
+		System.out.println("animationIsDone: " + info);
+		System.out.println(afterAnimations);
+		System.out.println(animations);
 
+		if (!animations.isEmpty()) {
+			final AnimateInfo next = animations.removeFirst();
+			gamePanel.doAnimation(next);
+
+			if (info != null) {
+				AtaxxState baseState = new AtaxxState(state.players(), info.base(), state.currentPlayer());
+				AtaxxChangeInfo aci = new AtaxxChangeInfo(ChangeType.GAME_MOVE, baseState);
+				scorePanel.update(aci, AnimateInfo.EMPTY_LIST);
+			}
+			return;
+		}
+
+		gamePanel.update(afterAnimations, AnimateInfo.EMPTY_LIST);
+		scorePanel.update(afterAnimations, AnimateInfo.EMPTY_LIST);
+		this.repaint();
 	}
 }
 

@@ -45,6 +45,14 @@ public record AtaxxBoard(List<AtaxxRow> rows) {
 		return rows.get(index).at(start.col());
 	}
 
+	public Scores computeScores() {
+		Scores s = new Scores(0, 0, 0, 0);
+		for (AtaxxRow row : rows()) {
+			s = s.with(row.getScore());
+		}
+		return s;
+	}
+
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
@@ -54,4 +62,5 @@ public record AtaxxBoard(List<AtaxxRow> rows) {
 		}
 		return sb.toString();
 	}
+
 }

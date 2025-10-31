@@ -11,9 +11,8 @@ import ca.jhayden.whim.ataxx.model.AtaxxChangeInfo;
 import ca.jhayden.whim.ataxx.model.ChangeType;
 import ca.jhayden.whim.ataxx.model.Player;
 import ca.jhayden.whim.ataxx.model.Tile;
-import ca.jhayden.whim.ataxx.ui.DoAfterAnimation;
 
-public class ScoreJPanel extends JPanel implements AtaxxGui, DoAfterAnimation {
+public class ScoreJPanel extends JPanel implements AtaxxGui {
 	private static final long serialVersionUID = 8710836157609000120L;
 
 	private EnumMap<Tile, ScoreSingleJPanel> map = new EnumMap<>(Tile.class);
@@ -38,11 +37,6 @@ public class ScoreJPanel extends JPanel implements AtaxxGui, DoAfterAnimation {
 			}
 		}
 
-		this.doAfterAnimations(changeInfo);
-	}
-
-	@Override
-	public void doAfterAnimations(AtaxxChangeInfo changeInfo) {
 		for (Player p : changeInfo.endState().players()) {
 			ScoreSingleJPanel panel = map.get(p.tile());
 			panel.doAfterAnimations(changeInfo);

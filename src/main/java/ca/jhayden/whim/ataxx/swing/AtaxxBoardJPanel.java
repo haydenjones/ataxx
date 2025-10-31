@@ -9,7 +9,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.util.List;
-import java.util.Vector;
 
 import javax.swing.JPanel;
 import javax.swing.Timer;
@@ -36,9 +35,6 @@ public class AtaxxBoardJPanel extends JPanel implements DoAnimation, AtaxxGui, M
 
 	AtaxxBoard board = AtaxxState.NULL.board();
 
-	Vector<AnimateInfo> animations = new Vector<>();
-	volatile AtaxxChangeInfo afterAnimations = null;
-
 	volatile AnimateInfo currentAnimation = null;
 	volatile long animationStart = 0;
 	volatile long animationEnd = 0;
@@ -61,6 +57,7 @@ public class AtaxxBoardJPanel extends JPanel implements DoAnimation, AtaxxGui, M
 
 	@Override
 	public void paint(Graphics g) {
+		// System.out.println("paint: " + g);
 		if (g instanceof Graphics2D g2d) {
 			this.drawTool.paint(g2d, this.board, this.startPos, this.cursorPos);
 
@@ -72,12 +69,13 @@ public class AtaxxBoardJPanel extends JPanel implements DoAnimation, AtaxxGui, M
 			final long stm = System.currentTimeMillis();
 			if (stm > this.animationEnd) {
 				this.currentAnimation = null;
+				this.gameHub.animationIsDone(ca);
 			}
-
-			float delta = (float) (stm - animationStart) / (animationEnd - animationStart);
-			delta = Math.min(delta, 1f);
-
-			this.drawTool.paint(g2d, delta, ca);
+			else {
+				float delta = (float) (stm - animationStart) / (animationEnd - animationStart);
+				delta = Math.min(delta, 1f);
+				this.drawTool.paint(g2d, delta, ca);
+			}
 		}
 	}
 
@@ -132,21 +130,15 @@ public class AtaxxBoardJPanel extends JPanel implements DoAnimation, AtaxxGui, M
 
 	@Override
 	public void update(AtaxxChangeInfo changeInfo, List<AnimateInfo> animations) {
-		this.animations.addAll(animations);
-		this.afterAnimations = changeInfo;
+		this.board = changeInfo.endState().board();
 	}
 
-	void setUpAnimation(AnimateInfo ai) {
+	@Override
+	public void doAnimation(AnimateInfo ai) {
 		this.board = ai.base();
 		this.currentAnimation = ai;
 		this.animationStart = System.currentTimeMillis();
 		this.animationEnd = 1000L + this.animationStart;
-	}
-
-	@Override
-	public void doAnimation(AnimateInfo info) {
-		// TODO Auto-generated method stub
-
 	}
 }
 
@@ -154,16 +146,6 @@ record AnimateTask(AtaxxBoardJPanel panel) implements ActionListener {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if (panel.currentAnimation != null) {
-			panel.repaint();
-		}
-		else if (!panel.animations.isEmpty()) {
-			AnimateInfo ai = panel.animations.removeFirst();
-			panel.setUpAnimation(ai);
-			panel.repaint();
-		}
-		else if (panel.afterAnimations != null) {
-			panel.board = panel.afterAnimations.endState().board();
-			panel.afterAnimations = null;
 			panel.repaint();
 		}
 	}
