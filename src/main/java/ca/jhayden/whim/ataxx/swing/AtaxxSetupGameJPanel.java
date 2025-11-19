@@ -1,9 +1,12 @@
 package ca.jhayden.whim.ataxx.swing;
 
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import ca.jhayden.whim.ataxx.engine.GameSetupType;
@@ -14,14 +17,24 @@ public class AtaxxSetupGameJPanel extends JPanel implements ActionListener {
 
 	private final GameHub gameHub;
 
-	public AtaxxSetupGameJPanel(GameHub hub) {
-		super();
+	public AtaxxSetupGameJPanel(GameHub hub, String gameOverMessage) {
+		super(new GridBagLayout());
 		this.gameHub = hub;
 
+		GridBagConstraints gbc = new GridBagConstraints();
+		if (!gameOverMessage.isEmpty()) {
+			gbc.gridwidth = GameSetupType.values().length;
+			this.add(new JLabel(gameOverMessage));
+		}
+
+		gbc.gridx = 0;
+		gbc.gridy = 1;
 		for (GameSetupType gst : GameSetupType.values()) {
 			JButton jb = new GameSetupJButton(gst);
-			this.add(jb);
+			this.add(jb, gbc);
 			jb.addActionListener(this);
+
+			gbc.gridy = gbc.gridy + 1;
 		}
 	}
 

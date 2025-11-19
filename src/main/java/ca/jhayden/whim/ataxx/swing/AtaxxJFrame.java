@@ -10,6 +10,7 @@ import java.util.Vector;
 import java.util.concurrent.TimeUnit;
 
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
 import ca.jhayden.whim.ataxx.ai.ComputeAiMove;
@@ -48,7 +49,7 @@ public class AtaxxJFrame extends JFrame implements GameHub, AtaxxGui {
 	}
 
 	private final ScoreJPanel scorePanel = new ScoreJPanel();
-	private final AtaxxSetupGameJPanel setupPanel = new AtaxxSetupGameJPanel(this);
+	private final AtaxxSetupGameJPanel setupPanel = new AtaxxSetupGameJPanel(this, "");
 	private final AtaxxBoardJPanel gamePanel = new AtaxxBoardJPanel(this, Tile.PIECE_1);
 
 	private GameSetup gameSetup = null;
@@ -135,6 +136,14 @@ public class AtaxxJFrame extends JFrame implements GameHub, AtaxxGui {
 			System.out.println("G A M E _ O V E R");
 			String message = AtaxxJFrame.computeGameOverMessage(newState);
 			System.out.println(message);
+			this.repaint();
+
+			AtaxxSetupGameJPanel panel = new AtaxxSetupGameJPanel(this, message);
+			int option = JOptionPane.showConfirmDialog(this, panel, "Gamve Over", JOptionPane.OK_CANCEL_OPTION,
+					JOptionPane.PLAIN_MESSAGE);
+			if (option == JOptionPane.CANCEL_OPTION) {
+				System.exit(0);
+			}
 		}
 
 		this.animationIsDone(null);

@@ -20,7 +20,7 @@ public interface GameSetup extends Serializable {
 
 	public enum AiType {
 		DEPTH_1(1), //
-		DEPTH_2(2);
+		DEPTH_2(4);
 
 		private final int value;
 

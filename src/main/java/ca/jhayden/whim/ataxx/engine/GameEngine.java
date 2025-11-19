@@ -33,12 +33,21 @@ public class GameEngine {
 			));
 			board = AtaxxBoard.of("""
 					1.....2
+					.....2.
+					1...22.
+					11.#.22
+					11....2
 					.......
 					.......
-					.......
-					.......
-					.......
-					2.....1""");
+					""");
+//			board = AtaxxBoard.of("""
+//					1..#..2
+//					...#...
+//					...#...
+//					#..#..#
+//					...#...
+//					...#...
+//					2..#..1""");
 		}
 		else if (setup.getNumberOfPlayers() == NumberOfPlayers.FOUR) {
 			players = Collections.unmodifiableList(List.of( //
@@ -49,11 +58,11 @@ public class GameEngine {
 			));
 			board = AtaxxBoard.of("""
 					1.....2
-					.......
+					.1...2.
 					.......
 					...#...
 					.......
-					.......
+					.3...4.
 					3.....4""");
 		}
 		else {
@@ -154,10 +163,6 @@ public class GameEngine {
 		final var out = new TreeSet<GameMove>();
 		out.addAll(allMoves.values());
 		return out;
-	}
-
-	static AnimateInfo computeFlipAnimateInfo() {
-		return null;
 	}
 
 	public static AtaxxChangeInfo applyMove(final AtaxxState state, final GameMove move,
