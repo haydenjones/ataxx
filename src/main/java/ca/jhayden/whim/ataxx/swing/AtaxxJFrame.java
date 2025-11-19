@@ -132,19 +132,6 @@ public class AtaxxJFrame extends JFrame implements GameHub, AtaxxGui {
 		if (changeInfo.type() == ChangeType.START_NEW_GAME) {
 			this.pack();
 		}
-		else if (changeInfo.type() == ChangeType.GAME_OVER) {
-			System.out.println("G A M E _ O V E R");
-			String message = AtaxxJFrame.computeGameOverMessage(newState);
-			System.out.println(message);
-			this.repaint();
-
-			AtaxxSetupGameJPanel panel = new AtaxxSetupGameJPanel(this, message);
-			int option = JOptionPane.showConfirmDialog(this, panel, "Gamve Over", JOptionPane.OK_CANCEL_OPTION,
-					JOptionPane.PLAIN_MESSAGE);
-			if (option == JOptionPane.CANCEL_OPTION) {
-				System.exit(0);
-			}
-		}
 
 		this.animationIsDone(null);
 
@@ -206,6 +193,21 @@ public class AtaxxJFrame extends JFrame implements GameHub, AtaxxGui {
 		gamePanel.update(afterAnimations, AnimateInfo.EMPTY_LIST);
 		scorePanel.update(afterAnimations, AnimateInfo.EMPTY_LIST);
 		this.repaint();
+
+		if (afterAnimations.type() == ChangeType.GAME_OVER) {
+			System.out.println("G A M E _ O V E R");
+			String message = AtaxxJFrame.computeGameOverMessage(afterAnimations.endState());
+			System.out.println(message);
+			this.repaint();
+
+			AtaxxSetupGameJPanel panel = new AtaxxSetupGameJPanel(this, message);
+			int option = JOptionPane.showConfirmDialog(this, panel, "Gamve Over", JOptionPane.OK_CANCEL_OPTION,
+					JOptionPane.PLAIN_MESSAGE);
+			if (option == JOptionPane.CANCEL_OPTION) {
+				System.exit(0);
+			}
+		}
+
 	}
 }
 
