@@ -1,7 +1,9 @@
-package ca.jhayden.whim.ataxx.swing;
+package ca.jhayden.whim.ataxx.launch;
 
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
+
+import ca.jhayden.whim.ataxx.swing.AtaxxJFrame;
 
 public class AtaxxSwingLauncher implements Runnable {
 	public static void main(String[] args) {
@@ -11,7 +13,7 @@ public class AtaxxSwingLauncher implements Runnable {
 
 	@Override
 	public void run() {
-		AtaxxJFrame ajf = new AtaxxJFrame();
+		final AtaxxJFrame ajf = new AtaxxJFrame();
 		ajf.setTitle("ATAXX");
 		ajf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		ajf.pack();

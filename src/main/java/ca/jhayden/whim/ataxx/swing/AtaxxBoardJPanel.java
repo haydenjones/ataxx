@@ -8,14 +8,12 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
-import java.util.List;
 
 import javax.swing.JPanel;
 import javax.swing.Timer;
 
 import ca.jhayden.whim.ataxx.model.AnimateInfo;
 import ca.jhayden.whim.ataxx.model.AtaxxBoard;
-import ca.jhayden.whim.ataxx.model.AtaxxChangeInfo;
 import ca.jhayden.whim.ataxx.model.AtaxxState;
 import ca.jhayden.whim.ataxx.model.GameMove;
 import ca.jhayden.whim.ataxx.model.Pos;
@@ -23,7 +21,7 @@ import ca.jhayden.whim.ataxx.model.Tile;
 import ca.jhayden.whim.ataxx.ui.DoAnimation;
 import ca.jhayden.whim.ataxx.ui.GameHub;
 
-public class AtaxxBoardJPanel extends JPanel implements DoAnimation, AtaxxGui, MouseMotionListener, MouseListener {
+public class AtaxxBoardJPanel extends JPanel implements DoAnimation, MouseMotionListener, MouseListener {
 	static final int SQUARE_LENGTH = 60;
 	static final int SQUARE_GAP = 4;
 
@@ -129,13 +127,8 @@ public class AtaxxBoardJPanel extends JPanel implements DoAnimation, AtaxxGui, M
 	}
 
 	@Override
-	public void update(AtaxxChangeInfo changeInfo, List<AnimateInfo> animations) {
-		this.board = changeInfo.endState().board();
-	}
-
-	@Override
 	public void doAnimation(AnimateInfo ai) {
-		this.board = ai.base();
+		this.board = ai.state().board();
 		this.currentAnimation = ai;
 		this.animationStart = System.currentTimeMillis();
 		this.animationEnd = 1000L + this.animationStart;

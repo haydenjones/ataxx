@@ -10,10 +10,8 @@ import java.util.TreeSet;
 import ca.jhayden.whim.ataxx.engine.GameSetup.NumberOfPlayers;
 import ca.jhayden.whim.ataxx.model.AnimateInfo;
 import ca.jhayden.whim.ataxx.model.AtaxxBoard;
-import ca.jhayden.whim.ataxx.model.AtaxxChangeInfo;
 import ca.jhayden.whim.ataxx.model.AtaxxRow;
 import ca.jhayden.whim.ataxx.model.AtaxxState;
-import ca.jhayden.whim.ataxx.model.ChangeType;
 import ca.jhayden.whim.ataxx.model.GameMove;
 import ca.jhayden.whim.ataxx.model.MoveType;
 import ca.jhayden.whim.ataxx.model.Player;
@@ -22,7 +20,7 @@ import ca.jhayden.whim.ataxx.model.Scores;
 import ca.jhayden.whim.ataxx.model.Tile;
 
 public class GameEngine {
-	public static AtaxxChangeInfo newGame(GameSetup setup) {
+	public static AtaxxState newGame(GameSetup setup) {
 		final List<Player> players;
 		final AtaxxBoard board;
 
@@ -31,23 +29,23 @@ public class GameEngine {
 					new Player(Tile.PIECE_1, true, Color.RED, "Red"), //
 					new Player(Tile.PIECE_2, false, Color.BLUE, "Blue") //
 			));
-			board = AtaxxBoard.of("""
-					1.....2
-					.....2.
-					1...22.
-					11.#.22
-					11....2
-					.......
-					.......
-					""");
 //			board = AtaxxBoard.of("""
-//					1..#..2
-//					...#...
-//					...#...
-//					#..#..#
-//					...#...
-//					...#...
-//					2..#..1""");
+//					1.....2
+//					.....2.
+//					1...22.
+//					11.#.22
+//					11....2
+//					.......
+//					.......
+//					""");
+			board = AtaxxBoard.of("""
+					1..#..2
+					...#...
+					...#...
+					#..#..#
+					...#...
+					...#...
+					2..#..1""");
 		}
 		else if (setup.getNumberOfPlayers() == NumberOfPlayers.FOUR) {
 			players = Collections.unmodifiableList(List.of( //
@@ -69,7 +67,7 @@ public class GameEngine {
 			throw new IllegalArgumentException("No support for " + setup + " player(s).");
 		}
 
-		return new AtaxxChangeInfo(ChangeType.START_NEW_GAME, new AtaxxState(players, board));
+		return new AtaxxState(players, board);
 	}
 
 	public static boolean isGameOver(AtaxxState state) {
@@ -165,9 +163,13 @@ public class GameEngine {
 		return out;
 	}
 
-	public static AtaxxChangeInfo applyMove(final AtaxxState state, final GameMove move,
-			final List<AnimateInfo> animationsDone) {
-		ApplyMoveTask task = new ApplyMoveTask(state, move, animationsDone);
-		return task.call();
+	public static AtaxxState applyMove(final AtaxxState state, final GameMove move) {
+		ApplyMoveTask task = new ApplyMoveTask(state, move);
+		return task.computeJustState();
+	}
+
+	public static List<AnimateInfo> computeAnimations(final AtaxxState state, final GameMove move) {
+		ApplyMoveTask task = new ApplyMoveTask(state, move);
+		return task.computeWithAnimations();
 	}
 }

@@ -1,6 +1,7 @@
 package ca.jhayden.whim.ataxx.engine;
 
 public enum GameSetupType implements GameSetup {
+
 	TWO_PLAYER_SIMPLE(NumberOfPlayers.TWO, AiType.DEPTH_1), //
 	TWO_PLAYER_SMART(NumberOfPlayers.TWO, AiType.DEPTH_2), //
 	FOUR_PLAYER_SIMPLE(NumberOfPlayers.FOUR, AiType.DEPTH_1);

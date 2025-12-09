@@ -10,20 +10,20 @@ import java.util.Vector;
 import java.util.concurrent.TimeUnit;
 
 import javax.swing.JFrame;
-import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
 import ca.jhayden.whim.ataxx.ai.ComputeAiMove;
 import ca.jhayden.whim.ataxx.engine.GameEngine;
 import ca.jhayden.whim.ataxx.engine.GameSetup;
 import ca.jhayden.whim.ataxx.model.AnimateInfo;
-import ca.jhayden.whim.ataxx.model.AtaxxChangeInfo;
+import ca.jhayden.whim.ataxx.model.AnimateInfoType;
 import ca.jhayden.whim.ataxx.model.AtaxxState;
-import ca.jhayden.whim.ataxx.model.ChangeType;
+import ca.jhayden.whim.ataxx.model.FromToPos;
 import ca.jhayden.whim.ataxx.model.GameMove;
 import ca.jhayden.whim.ataxx.model.Player;
 import ca.jhayden.whim.ataxx.model.Scores;
 import ca.jhayden.whim.ataxx.model.Tile;
+import ca.jhayden.whim.ataxx.ui.AtaxxGui;
 import ca.jhayden.whim.ataxx.ui.GameHub;
 
 public class AtaxxJFrame extends JFrame implements GameHub, AtaxxGui {
@@ -56,7 +56,6 @@ public class AtaxxJFrame extends JFrame implements GameHub, AtaxxGui {
 	private AtaxxState state = null;
 
 	private Vector<AnimateInfo> animations = new Vector<>();
-	private volatile AtaxxChangeInfo afterAnimations = null;
 
 	public AtaxxJFrame() {
 		super();
@@ -70,19 +69,21 @@ public class AtaxxJFrame extends JFrame implements GameHub, AtaxxGui {
 	@Override
 	public void startNewGame(GameSetup setup) {
 		this.gameSetup = setup;
-		final AtaxxChangeInfo changeInfo = GameEngine.newGame(setup);
+		this.state = GameEngine.newGame(setup);
 
-		for (Player p : changeInfo.endState().players()) {
+		for (Player p : this.state.players()) {
 			COLOR_MAP.put(p.tile(), p.color());
 			COLOR_NAME.put(p.tile(), p.name());
 		}
 
-		this.state = changeInfo.endState();
-
 		this.getContentPane().remove(setupPanel);
 		this.getContentPane().add(gamePanel, BorderLayout.CENTER);
 
-		this.update(changeInfo, AnimateInfo.EMPTY_LIST);
+		AnimateInfo ai = new AnimateInfo(this.state, AnimateInfoType.START_NEW_GAME, Tile.EMPTY, FromToPos.EMPTY_LIST);
+		List<AnimateInfo> list = new ArrayList<>();
+		list.add(ai);
+
+		this.update(list);
 	}
 
 	static String computeGameOverMessage(AtaxxState state) {
@@ -97,8 +98,6 @@ public class AtaxxJFrame extends JFrame implements GameHub, AtaxxGui {
 		for (Player p : players) {
 			final Tile playerTile = p.tile();
 			final int playerScore = score.count(p.tile());
-
-			System.out.println(playerScore + "/" + bestScore + ") " + p);
 
 			if (playerScore > bestScore) {
 				bestPlayers.clear();
@@ -117,51 +116,20 @@ public class AtaxxJFrame extends JFrame implements GameHub, AtaxxGui {
 	}
 
 	@Override
-	public void update(AtaxxChangeInfo changeInfo, List<AnimateInfo> animations) {
+	public void update(List<AnimateInfo> animations) {
 		System.out.println("");
 		System.out.println("update:");
-		System.out.println(changeInfo);
 		System.out.println(animations);
-
 		this.animations.addAll(animations);
-		this.afterAnimations = changeInfo;
-
-		final AtaxxState newState = changeInfo.endState();
-		this.state = newState;
-
-		if (changeInfo.type() == ChangeType.START_NEW_GAME) {
-			this.pack();
-		}
-
 		this.animationIsDone(null);
-
-		this.repaint();
-
-		// If the player is human and they don't have a move, then PASS.
-		if (newState.currentPlayer().isHuman()) {
-			SortedSet<GameMove> playerMoves = GameEngine.computeAllMoves(newState);
-			if (playerMoves.isEmpty()) {
-				this.move(GameMove.PASS, null);
-			}
-		}
 	}
 
 	@Override
 	public void move(final GameMove move, Object from) {
 		boolean allow = GameEngine.isValidMove(this.state, move);
 		if (allow) {
-			final var animations = new ArrayList<AnimateInfo>();
-			AtaxxChangeInfo changeInfo = GameEngine.applyMove(this.state, move, animations);
-			this.update(changeInfo, animations);
-
-			if (changeInfo.type() == ChangeType.GAME_MOVE) {
-				final AtaxxState newState = changeInfo.endState();
-				if (!newState.currentPlayer().isHuman()) {
-					PerformAiMoveTask task = new PerformAiMoveTask(this, newState, this.gameSetup.getAiType().value());
-					Thread t = new Thread(task);
-					t.start();
-				}
-			}
+			final var animations = GameEngine.computeAnimations(this.state, move);
+			this.update(animations);
 		}
 	}
 
@@ -175,39 +143,43 @@ public class AtaxxJFrame extends JFrame implements GameHub, AtaxxGui {
 	public void animationIsDone(AnimateInfo info) {
 		System.out.println("");
 		System.out.println("animationIsDone: " + info);
-		System.out.println(afterAnimations);
 		System.out.println(animations);
 
 		if (!animations.isEmpty()) {
 			final AnimateInfo next = animations.removeFirst();
-			gamePanel.doAnimation(next);
 
-			if (info != null) {
-				AtaxxState baseState = new AtaxxState(state.players(), info.base(), state.currentPlayer());
-				AtaxxChangeInfo aci = new AtaxxChangeInfo(ChangeType.GAME_MOVE, baseState);
-				scorePanel.update(aci, AnimateInfo.EMPTY_LIST);
+			this.state = next.state();
+
+			this.scorePanel.doAnimation(next);
+			this.gamePanel.doAnimation(next);
+			if (next.type() == AnimateInfoType.START_NEW_GAME) {
+				this.pack();
 			}
-			return;
-		}
-
-		gamePanel.update(afterAnimations, AnimateInfo.EMPTY_LIST);
-		scorePanel.update(afterAnimations, AnimateInfo.EMPTY_LIST);
-		this.repaint();
-
-		if (afterAnimations.type() == ChangeType.GAME_OVER) {
-			System.out.println("G A M E _ O V E R");
-			String message = AtaxxJFrame.computeGameOverMessage(afterAnimations.endState());
-			System.out.println(message);
-			this.repaint();
-
-			AtaxxSetupGameJPanel panel = new AtaxxSetupGameJPanel(this, message);
-			int option = JOptionPane.showConfirmDialog(this, panel, "Gamve Over", JOptionPane.OK_CANCEL_OPTION,
-					JOptionPane.PLAIN_MESSAGE);
-			if (option == JOptionPane.CANCEL_OPTION) {
-				System.exit(0);
+			else if (next.type() == AnimateInfoType.TURN_IS_DONE) {
+				if (GameEngine.isGameOver(state)) {
+					List<AnimateInfo> list = List
+							.of(new AnimateInfo(state, AnimateInfoType.GAME_IS_OVER, Tile.EMPTY, FromToPos.EMPTY_LIST));
+					this.update(list);
+				}
+				else if (!state.currentPlayer().isHuman()) {
+					PerformAiMoveTask task = new PerformAiMoveTask(this, state, this.gameSetup.getAiType().value());
+					Thread t = new Thread(task);
+					t.start();
+				}
+				else {
+					SortedSet<GameMove> humanMoves = GameEngine.computeAllMoves(this.state);
+					if (humanMoves.isEmpty()) {
+						// Human needs to pass.
+						this.move(GameMove.PASS, this);
+					}
+				}
+			}
+			else if (next.type() == AnimateInfoType.GAME_IS_OVER) {
+				System.out.println("G A M E _ O V E R");
+				String message = AtaxxJFrame.computeGameOverMessage(state);
+				System.out.println(message);
 			}
 		}
-
 	}
 }
 

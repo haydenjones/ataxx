@@ -130,13 +130,13 @@ public class DrawOnBoard {
 	}
 
 	void paint(Graphics2D g2d, float delta, AnimateInfo ca) {
-		if ((ca.type() == AnimateInfoType.GROW) || (ca.type() == AnimateInfoType.JUMP)) {
+		if ((ca.type() == AnimateInfoType.MAIN_PIECE_GROW) || (ca.type() == AnimateInfoType.MAIN_PIECE_JUMP)) {
 			final Color color = AtaxxJFrame.COLOR_MAP.get(ca.tile());
 			FromToPos f2p = ca.positions().getFirst();
 			Rect r = computeOval(f2p, delta);
 			fillOval(g2d, r, color);
 		}
-		else if (ca.type() == AnimateInfoType.FLIP) {
+		else if (ca.type() == AnimateInfoType.FLIP_SURROUNDING_PIECES) {
 			final Color color = AtaxxJFrame.COLOR_MAP.get(ca.tile());
 			for (FromToPos f2p : ca.positions()) {
 				Rect r = computeOvalSmall(f2p, delta);

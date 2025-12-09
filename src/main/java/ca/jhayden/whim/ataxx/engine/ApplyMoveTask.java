@@ -3,14 +3,13 @@ package ca.jhayden.whim.ataxx.engine;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.TreeMap;
 
 import ca.jhayden.whim.ataxx.model.AnimateInfo;
 import ca.jhayden.whim.ataxx.model.AnimateInfoType;
 import ca.jhayden.whim.ataxx.model.AtaxxBoard;
-import ca.jhayden.whim.ataxx.model.AtaxxChangeInfo;
 import ca.jhayden.whim.ataxx.model.AtaxxState;
-import ca.jhayden.whim.ataxx.model.ChangeType;
 import ca.jhayden.whim.ataxx.model.FromToPos;
 import ca.jhayden.whim.ataxx.model.GameMove;
 import ca.jhayden.whim.ataxx.model.MoveType;
@@ -18,69 +17,97 @@ import ca.jhayden.whim.ataxx.model.Player;
 import ca.jhayden.whim.ataxx.model.Pos;
 import ca.jhayden.whim.ataxx.model.Tile;
 
-public record ApplyMoveTask(AtaxxState state, GameMove move, List<AnimateInfo> animationsDone) {
-	public AtaxxChangeInfo call() {
+public class ApplyMoveTask {
+	private final AtaxxState beginState;
+	private final GameMove move;
+
+	public ApplyMoveTask(AtaxxState beginState, GameMove move) {
+		super();
+		this.beginState = Objects.requireNonNull(beginState);
+		this.move = Objects.requireNonNull(move);
+
+	}
+
+	public List<AnimateInfo> computeWithAnimations() {
+		final List<AnimateInfo> animations = new ArrayList<>();
+		doMove(animations);
+		return animations;
+	}
+
+	public AtaxxState computeJustState() {
+		return doMove(null);
+	}
+
+	AtaxxState doMove(List<AnimateInfo> animations) {
 		// Check that the move is valid
-		if (!GameEngine.isValidMove(state, move)) {
+		if (!GameEngine.isValidMove(beginState, move)) {
 			throw new IllegalArgumentException(move + " NOT allowed.");
 		}
 
-		// Advance the player
-		int index = state.players().indexOf(state.currentPlayer());
-		int nextPlayerIndex = (index + 1) % state.players().size();
-		final Player nextPlayer = state.players().get(nextPlayerIndex);
-
-		AtaxxBoard board = state.board();
+		AtaxxBoard board = beginState.board();
 
 		// Update the Board
 		if (move != GameMove.PASS) {
 			final Pos endPos = move.start().translate(move.move());
-			AtaxxBoard afterTheMove = moveThePrimaryPiece(endPos);
-			board = flipTheNeighbours(afterTheMove, endPos);
+			AtaxxBoard afterTheMove = moveThePrimaryPiece(endPos, animations);
+			board = flipTheNeighbours(afterTheMove, endPos, animations);
 		}
 
-		var newState = new AtaxxState(state.players(), board, nextPlayer);
-		var changeType = GameEngine.isGameOver(newState) ? ChangeType.GAME_OVER : ChangeType.GAME_MOVE;
-		return new AtaxxChangeInfo(changeType, newState);
+		// Advance the player
+		int index = beginState.players().indexOf(beginState.currentPlayer());
+		int nextPlayerIndex = (index + 1) % beginState.players().size();
+		final Player nextPlayer = beginState.players().get(nextPlayerIndex);
+
+		final AtaxxState endState = new AtaxxState(beginState.players(), board, nextPlayer);
+		if (animations != null) {
+			AnimateInfo ai = new AnimateInfo(endState, AnimateInfoType.TURN_IS_DONE, nextPlayer.tile(),
+					FromToPos.EMPTY_LIST);
+			animations.add(ai);
+		}
+		return endState;
 	}
 
-	void addAnimation(AnimateInfoType type, AtaxxBoard base, Tile tile, FromToPos positions) {
-		if (animationsDone == null) {
+	void addAnimation(List<AnimateInfo> animations, AnimateInfoType type, AtaxxBoard base, Tile tile,
+			FromToPos positions) {
+		if (animations == null) {
 			return;
 		}
-		addAnimation(type, base, tile, List.of(positions));
+
+		AtaxxState baseState = new AtaxxState(beginState.players(), base, beginState.currentPlayer());
+		AnimateInfo ai = new AnimateInfo(baseState, type, tile, List.of(positions));
+		animations.add(ai);
 	}
 
-	void addAnimation(AnimateInfoType type, AtaxxBoard base, Tile tile, List<FromToPos> positions) {
-		if (animationsDone == null) {
+	void addFlipAnimation(List<AnimateInfo> animations, AtaxxBoard base, Tile tile, List<FromToPos> positions) {
+		if ((animations == null) || (positions.isEmpty())) {
 			return;
 		}
-		else if (positions.isEmpty()) {
-			return;
-		}
-		AnimateInfo ai = new AnimateInfo(base, type, tile, positions);
-		animationsDone.add(ai);
+
+		AtaxxState baseState = new AtaxxState(beginState.players(), base, beginState.currentPlayer());
+		AnimateInfo ai = new AnimateInfo(baseState, AnimateInfoType.FLIP_SURROUNDING_PIECES, tile, positions);
+		animations.add(ai);
 	}
 
-	AtaxxBoard moveThePrimaryPiece(Pos endPos) {
+	AtaxxBoard moveThePrimaryPiece(Pos endPos, List<AnimateInfo> animations) {
 		Map<Pos, Tile> changedTiles = new TreeMap<>();
 
 		if (move.move().isJump()) {
 			changedTiles.put(move.start(), Tile.EMPTY);
-			AtaxxBoard base = this.state().board().with(changedTiles);
-
-			addAnimation(AnimateInfoType.JUMP, base, move.tile(), new FromToPos(move.start(), endPos));
+			AtaxxBoard base = this.beginState.board().with(changedTiles);
+			addAnimation(animations, AnimateInfoType.MAIN_PIECE_JUMP, base, beginState.currentPlayer().tile(),
+					new FromToPos(move.start(), endPos));
 		}
 		else {
-			addAnimation(AnimateInfoType.GROW, state.board(), move.tile(), new FromToPos(move.start(), endPos));
+			addAnimation(animations, AnimateInfoType.MAIN_PIECE_GROW, beginState.board(), move.tile(),
+					new FromToPos(move.start(), endPos));
 		}
 
 		changedTiles.put(endPos, move.tile());
 
-		return state.board().with(changedTiles);
+		return beginState.board().with(changedTiles);
 	}
 
-	AtaxxBoard flipTheNeighbours(AtaxxBoard board, Pos endPos) {
+	AtaxxBoard flipTheNeighbours(AtaxxBoard board, Pos endPos, List<AnimateInfo> animations) {
 		Map<Pos, Tile> changedTiles = new TreeMap<>();
 		var positions = new ArrayList<FromToPos>();
 
@@ -97,7 +124,7 @@ public record ApplyMoveTask(AtaxxState state, GameMove move, List<AnimateInfo> a
 			}
 		}
 
-		addAnimation(AnimateInfoType.FLIP, board, this.move.tile(), positions);
+		addFlipAnimation(animations, board, this.move.tile(), positions);
 		return board.with(changedTiles);
 	}
 }
