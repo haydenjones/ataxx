@@ -33,6 +33,8 @@ public interface GameSetup extends Serializable {
 		}
 	}
 
+	public abstract boolean isPlayerOrderRandom();
+	
 	public abstract NumberOfPlayers getNumberOfPlayers();
 
 	public abstract AiType getAiType();

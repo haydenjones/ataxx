@@ -6,7 +6,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
-import javax.swing.JLabel;
+import javax.swing.JCheckBox;
 import javax.swing.JPanel;
 
 import ca.jhayden.whim.ataxx.engine.GameSetupType;
@@ -17,25 +17,23 @@ public class AtaxxSetupGameJPanel extends JPanel implements ActionListener {
 
 	private final GameHub gameHub;
 
-	public AtaxxSetupGameJPanel(GameHub hub, String gameOverMessage) {
+	public AtaxxSetupGameJPanel(GameHub hub, ActionListener al) {
 		super(new GridBagLayout());
 		this.gameHub = hub;
 
 		GridBagConstraints gbc = new GridBagConstraints();
-		if (!gameOverMessage.isEmpty()) {
-			gbc.gridwidth = GameSetupType.values().length;
-			this.add(new JLabel(gameOverMessage));
-		}
 
 		gbc.gridx = 0;
 		gbc.gridy = 1;
 		for (GameSetupType gst : GameSetupType.values()) {
 			JButton jb = new GameSetupJButton(gst);
 			this.add(jb, gbc);
-			jb.addActionListener(this);
+			jb.addActionListener(al);
 
 			gbc.gridy = gbc.gridy + 1;
 		}
+		
+		this.add(new AttributesJPanel(), gbc);
 	}
 
 	@Override
@@ -44,6 +42,23 @@ public class AtaxxSetupGameJPanel extends JPanel implements ActionListener {
 			gameHub.startNewGame(gsb.getGameSetupType());
 		}
 	}
+}
+
+class AttributesJPanel extends JPanel {
+	private final JCheckBox cbRandomPlayerOrder = new JCheckBox("Player Order: Random");
+	
+	public AttributesJPanel() {
+		super(new GridBagLayout());
+		
+		GridBagConstraints gbc = new GridBagConstraints();
+
+		gbc.gridx = 0;
+		gbc.gridy = 1;
+
+		add(cbRandomPlayerOrder, gbc);
+	}
+	
+	
 }
 
 class GameSetupJButton extends JButton {

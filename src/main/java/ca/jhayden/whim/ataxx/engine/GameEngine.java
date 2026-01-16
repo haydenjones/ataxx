@@ -1,9 +1,11 @@
 package ca.jhayden.whim.ataxx.engine;
 
 import java.awt.Color;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Random;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -21,23 +23,14 @@ import ca.jhayden.whim.ataxx.model.Tile;
 
 public class GameEngine {
 	public static AtaxxState newGame(GameSetup setup) {
-		final List<Player> players;
+		final List<Player> players = new ArrayList<>();
 		final AtaxxBoard board;
 
 		if (setup.getNumberOfPlayers() == NumberOfPlayers.TWO) {
-			players = Collections.unmodifiableList(List.of(//
+			players.addAll(List.of(//
 					new Player(Tile.PIECE_1, true, Color.RED, "Red"), //
 					new Player(Tile.PIECE_2, false, Color.BLUE, "Blue") //
 			));
-//			board = AtaxxBoard.of("""
-//					1.....2
-//					.....2.
-//					1...22.
-//					11.#.22
-//					11....2
-//					.......
-//					.......
-//					""");
 			board = AtaxxBoard.of("""
 					1..#..2
 					...#...
@@ -48,7 +41,7 @@ public class GameEngine {
 					2..#..1""");
 		}
 		else if (setup.getNumberOfPlayers() == NumberOfPlayers.FOUR) {
-			players = Collections.unmodifiableList(List.of( //
+			players.addAll(List.of( //
 					new Player(Tile.PIECE_1, true, Color.RED, "Red"), //
 					new Player(Tile.PIECE_2, false, Color.BLUE, "Blue"), //
 					new Player(Tile.PIECE_3, false, Color.MAGENTA, "Magenta"), //
@@ -57,9 +50,9 @@ public class GameEngine {
 			board = AtaxxBoard.of("""
 					1.....2
 					.1...2.
-					.......
 					...#...
-					.......
+					..#.#..
+					...#...
 					.3...4.
 					3.....4""");
 		}
@@ -67,7 +60,24 @@ public class GameEngine {
 			throw new IllegalArgumentException("No support for " + setup + " player(s).");
 		}
 
-		return new AtaxxState(players, board);
+		final List<Player> p;
+		
+		if (setup.isPlayerOrderRandom())  {
+			final Random r = new Random();
+			
+			for (int i1=0; i1<players.size(); i1++)  {
+				int index = r.nextInt(players.size());
+				final Player z = players.remove(index);
+				players.addFirst(z);
+			}
+			
+			p = Collections.unmodifiableList(players);
+		}
+		else {
+			p = Collections.unmodifiableList(players);
+		}
+		
+		return new AtaxxState(p, board);
 	}
 
 	public static boolean isGameOver(AtaxxState state) {

@@ -2,6 +2,8 @@ package ca.jhayden.whim.ataxx.swing;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
@@ -26,7 +28,7 @@ import ca.jhayden.whim.ataxx.model.Tile;
 import ca.jhayden.whim.ataxx.ui.AtaxxGui;
 import ca.jhayden.whim.ataxx.ui.GameHub;
 
-public class AtaxxJFrame extends JFrame implements GameHub, AtaxxGui {
+public class AtaxxJFrame extends JFrame implements GameHub, AtaxxGui, ActionListener {
 	private static final long serialVersionUID = 5990472863772348300L;
 
 	static final EnumMap<Tile, Color> COLOR_MAP = new EnumMap<>(Tile.class);
@@ -49,7 +51,7 @@ public class AtaxxJFrame extends JFrame implements GameHub, AtaxxGui {
 	}
 
 	private final ScoreJPanel scorePanel = new ScoreJPanel();
-	private final AtaxxSetupGameJPanel setupPanel = new AtaxxSetupGameJPanel(this, "");
+	private final AtaxxSetupGameJPanel setupPanel = new AtaxxSetupGameJPanel(this, this);
 	private final AtaxxBoardJPanel gamePanel = new AtaxxBoardJPanel(this, Tile.PIECE_1);
 
 	private GameSetup gameSetup = null;
@@ -79,47 +81,15 @@ public class AtaxxJFrame extends JFrame implements GameHub, AtaxxGui {
 		this.getContentPane().remove(setupPanel);
 		this.getContentPane().add(gamePanel, BorderLayout.CENTER);
 
-		AnimateInfo ai = new AnimateInfo(this.state, AnimateInfoType.START_NEW_GAME, Tile.EMPTY, FromToPos.EMPTY_LIST);
 		List<AnimateInfo> list = new ArrayList<>();
-		list.add(ai);
+		list.add(new AnimateInfo(this.state, AnimateInfoType.START_NEW_GAME, Tile.EMPTY, FromToPos.EMPTY_LIST));
+		list.add(new AnimateInfo(this.state, AnimateInfoType.TURN_IS_DONE, Tile.EMPTY, FromToPos.EMPTY_LIST));
 
 		this.update(list);
 	}
 
-	static String computeGameOverMessage(AtaxxState state) {
-		return computeGameOverMessage(state.computeScores(), state.players());
-	}
-
-	static String computeGameOverMessage(final Scores score, final List<Player> players) {
-		int bestScore = 0;
-		final List<String> bestPlayers = new ArrayList<>();
-		System.out.println(score);
-
-		for (Player p : players) {
-			final Tile playerTile = p.tile();
-			final int playerScore = score.count(p.tile());
-
-			if (playerScore > bestScore) {
-				bestPlayers.clear();
-				bestScore = playerScore;
-			}
-
-			if (bestScore == playerScore) {
-				bestPlayers.add(COLOR_NAME.get(playerTile));
-			}
-
-			System.out.println(bestPlayers);
-			System.out.println("");
-		}
-
-		return "Winners are " + bestPlayers;
-	}
-
 	@Override
 	public void update(List<AnimateInfo> animations) {
-		System.out.println("");
-		System.out.println("update:");
-		System.out.println(animations);
 		this.animations.addAll(animations);
 		this.animationIsDone(null);
 	}
@@ -175,10 +145,17 @@ public class AtaxxJFrame extends JFrame implements GameHub, AtaxxGui {
 				}
 			}
 			else if (next.type() == AnimateInfoType.GAME_IS_OVER) {
-				System.out.println("G A M E _ O V E R");
-				String message = AtaxxJFrame.computeGameOverMessage(state);
-				System.out.println(message);
+				GameOverDialog jd = new GameOverDialog(this, state);
+				jd.pack();
+				jd.setVisible(true);
 			}
+		}
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		if (e.getSource() instanceof GameSetupJButton gsb) {
+			this.startNewGame(gsb.getGameSetupType());
 		}
 	}
 }
